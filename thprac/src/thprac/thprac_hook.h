@@ -17,6 +17,7 @@ extern uintptr_t ingame_image_base;
 struct HookCtx;
 typedef void __fastcall Callback(PCONTEXT pCtx, HookCtx* self);
 
+#ifndef _WIN64
 inline void PushHelper32(CONTEXT* pCtx, DWORD value)
 {
     pCtx->Esp -= 4;
@@ -29,6 +30,8 @@ inline DWORD PopHelper32(CONTEXT* pCtx)
     pCtx->Esp += 4;
     return ret;
 }
+
+#endif
 
 // Everything starting from here was written by zero318, with only minor tweaks from 32th
 #define bitsof(type) \

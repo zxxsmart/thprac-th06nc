@@ -614,18 +614,18 @@ namespace Gui {
     }
     bool ImplWin32HookWndProc()
     {
-        __thimgui_wp_original = (WNDPROC)GetWindowLongW(g_hWnd, GWLP_WNDPROC);
+        __thimgui_wp_original = (WNDPROC)GetWindowLongPtrW(g_hWnd, GWLP_WNDPROC);
         if (!__thimgui_wp_original) {
             return false;
         }
-        if (!SetWindowLongW(g_hWnd, GWLP_WNDPROC, (LONG)__ThImGui_WndProc_HookFunc)) {
+        if (!SetWindowLongPtrW(g_hWnd, GWLP_WNDPROC, (LONG_PTR)__ThImGui_WndProc_HookFunc)) {
             return false;
         }
         return true;
     }
     bool ImplWin32UnHookWndProc()
     {
-        return SetWindowLongW(g_hWnd, GWLP_WNDPROC, (LONG)__thimgui_wp_original) != 0;
+        return SetWindowLongPtrW(g_hWnd, GWLP_WNDPROC, (LONG_PTR)__thimgui_wp_original) != 0;
     }
     bool ImplWin32CheckFullScreen()
     {

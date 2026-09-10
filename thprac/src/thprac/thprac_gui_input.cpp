@@ -30,7 +30,7 @@ namespace THPrac
 					return true;
 			return false;
 		}
-		__forceinline bool __GI_Gen1_Init(int reg1, int reg2, int reg3)
+		__forceinline bool __GI_Gen1_Init(uintptr_t reg1, uintptr_t reg2, uintptr_t reg3)
 		{
 			__gi_gen1_r1 = (int16_t*)reg1;
 			__gi_gen1_r2 = (int16_t*)reg2;
@@ -73,7 +73,7 @@ namespace THPrac
 			if (*__gi_gen2_r1 & mask) return true;
 			return false;
 		}
-		__forceinline bool __GI_Gen2_Init(int reg1, int reg2, [[maybe_unused]] int reg3)
+		__forceinline bool __GI_Gen2_Init(uintptr_t reg1, uintptr_t reg2, [[maybe_unused]] uintptr_t reg3)
 		{
 			__gi_gen2_r1 = (int32_t*)reg1;
 			__gi_gen2_r2 = (int8_t*)reg2;
@@ -106,7 +106,7 @@ namespace THPrac
 
 		// API
 		static ingame_input_gen_t __gi_gen = INGAGME_INPUT_NONE;
-		bool InGameInputInit(ingame_input_gen_t gen, int reg1, int reg2, int reg3)
+		bool InGameInputInit(ingame_input_gen_t gen, uintptr_t reg1, uintptr_t reg2, uintptr_t reg3)
 		{
 			__gi_gen = gen;
 			switch (gen)

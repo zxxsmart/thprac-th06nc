@@ -56,6 +56,7 @@ enum THGameID {
     ID_TH185,
     ID_TH19,
     ID_TH20,
+    ID_TH06NC,
     ID_TH_MAX,
 };
 
@@ -128,6 +129,7 @@ enum ThVersionArrOffset {
     VER_TH19_V1_00A,
     VER_TH19_V1_10C,
     VER_TH20,
+    VER_TH06NC,
     VER_MAX,
 };
 

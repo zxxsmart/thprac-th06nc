@@ -387,6 +387,11 @@ constexpr const THGameVersion gGameVersions[] = {
             .textSize = 1484288,
         },
         .oepCode = { 0xaca9, 0x4244, 0xaa43, 0xba33, 0xbaba, 0x4684, 0xcc47, 0xbc05, 0xc02d, 0x4a47 }
+    },
+    {
+        .gameId = ID_TH06NC,
+        .exeInfo = { .timeStamp = 1788754577, .textSize = 2878464 },
+        .oepCode = { 0xc209, 0x6aae, 0x00ab, 0x4442, 0x0d45, 0x82c5, 0xae6f, 0xb632, 0xb6b6, 0x8686 }
     }
 };
 
@@ -775,6 +780,7 @@ const char* gThGameStrs[] = {
     "th185",
     "th19",
     "th20",
+    "th06nc",
 };
 
 ExeInfo GetExeInfo(const uint8_t* mod, size_t len) {

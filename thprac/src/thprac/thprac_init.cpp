@@ -1,3 +1,4 @@
+#include "thprac_native.h"
 #define NOMINMAX
 #include "utils/wininternal.h"
 
@@ -80,6 +81,7 @@ RUN_GAME_STATUS TryRunGame(const wchar_t* exeFn, wchar_t* cmdLine, uint32_t flag
         }
     }
 
+    if (knownGame.ver->gameId == ID_TH06NC) return LaunchTH06NC((flags & RUN_FLAG_THPRAC) != 0) ? RUN_GAME_SUCCESS : RUN_GAME_FAILURE;
     auto* ver = knownGame.ver;
     if (!ver->has_oilp) {
         flags &= ~RUN_FLAG_OILP;

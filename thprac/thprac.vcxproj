@@ -203,7 +203,7 @@
       <AdditionalOptions Condition="'$(ToolsetType)'=='ClangCL'">-Wno-parentheses -Wno-missing-designated-field-initializers %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <CustomBuildStep>
-      <Command>loc_json.exe src\thprac</Command>
+      <Command>"$(ProjectDir)loc_json.exe" "$(ProjectDir)src\thprac"</Command>
       <Inputs>src\thprac\thprac_games_def.h</Inputs>
       <Outputs>nonexistent</Outputs>
     </CustomBuildStep>

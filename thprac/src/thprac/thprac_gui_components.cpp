@@ -471,6 +471,9 @@ namespace THPrac
             else
                 return false;
         }
+#ifndef THPRAC_NATIVE_WIDGETS_ONLY
+        // These two controls own the legacy x86 instruction-patch hooks.
+        // Native modules use their game-thread callbacks for hotkey actions.
         bool GuiHotKey::operator()(bool use_widget)
         {
 
@@ -517,6 +520,7 @@ namespace THPrac
             return flag;
         }
 
+#endif
         void GuiTimer::Start()
         {
             if (!mIsTiming) {

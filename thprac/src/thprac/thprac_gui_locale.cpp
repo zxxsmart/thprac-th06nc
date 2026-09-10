@@ -1,6 +1,7 @@
 #include "thprac_gui_locale.h"
 #include <imgui.h>
 #include <imgui_freetype.h>
+#include <cstdlib>
 
 #define NOMINMAX
 #include <Windows.h>

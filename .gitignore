@@ -275,3 +275,12 @@ thprac_launcher_log.txt
 
 # Visual Studio cache folder
 enc_temp_folder/
+# Local native-module builds and game fixtures (never distribute game data).
+/build/
+/test-th06/
+/build*.log
+/*.jpg
+/test-pid.txt
+/test-screen.png
+/audit_nc_ecl.obj
+__pycache__/

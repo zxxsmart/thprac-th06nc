@@ -2,6 +2,7 @@
 
 #include "thprac_load_exe.h"
 #include "thprac_identify.h"
+#include "thprac_native.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -188,6 +189,15 @@ LauncherGame gamesAll[ID_TH_MAX - 1] = {
         .shot_columns = 4,        
     },
     {
+        .id = ID_TH06NC,
+        .title = TH06NC_TITLE,
+        .versions = gGameVersions + VER_TH06NC,
+        .ver_count = 1,
+        .steamId = 4659620,
+        .shots = THPRAC_GAMEROLL_TH06_SHOTTYPES,
+        .shot_columns = 2,
+    },
+    {
         .id = ID_ALCOSTG,
         .title = ALCOSTG_TITLE,
         .versions = gGameVersions + VER_ALCOSTG,
@@ -370,6 +380,7 @@ static bool LauncherRunGame(LauncherState* state, THGameID game, LauncherInstanc
     case LAUNCH_NOTHING:
         break;
     }
+    if (game == ID_TH06NC) return LaunchTH06NC(inst->apply_thprac);
     if (inst->type != TYPE_THCRAP) {
         if (inst->type != TYPE_STEAM) {
             uint32_t flags = RUN_FLAG_SKIP_IDENTIFY;
@@ -447,7 +458,7 @@ static void InitLauncherGame(LauncherState* state, LauncherGame* game, yyjson_va
 
         ver = game->versions + ver_off;
         bool apply_thprac = false;
-        if (ver->initFunc) {
+        if (ver->initFunc || game->id == ID_TH06NC) {
             switch (state->settings.apply_thprac_default) {
             case APPLY_THPRAC_KEEP_STATE:
                 yyjson_eval_numeric(yyjson_obj_get(cur, "apply_thprac"), &apply_thprac);
@@ -483,7 +494,22 @@ static void InitLauncherGame(LauncherState* state, LauncherGame* game, yyjson_va
     yyjson_eval_numeric(yyjson_obj_get(json, "default_launch"), &game->default_launch);
 }
 
+static void EnsureNCSteamInstance() {
+    for (auto& game : games) if (game.id == ID_TH06NC && !game.instances) {
+        auto* instance = static_cast<LauncherInstance*>(calloc(1, sizeof(LauncherInstance)));
+        if (!instance) return;
+        instance->path = _strdup("steam://rungameid/4659620");
+        instance->name = _strdup("Steam - th06nc 1.03");
+        instance->type = TYPE_STEAM;
+        instance->apply_thprac = true;
+        game.instances = instance;
+        game.inst_count = 1;
+        game.default_launch = 0;
+    }
+}
+
 void LoadGamesJson(LauncherState* state) {
+    struct EnsureNC { ~EnsureNC() { EnsureNCSteamInstance(); } } ensureNC;
     auto [doc, root] = LoadConfigFile(L"games.json", "games");
     if (!yyjson_is_obj(root)) {
         yyjson_doc_free(doc);
@@ -779,7 +805,7 @@ static bool DetailsPage(LauncherState* state) {
 
     auto* ver = game->versions + inst->ver;
 
-    if (ver->initFunc) {
+    if (ver->initFunc || game->id == ID_TH06NC) {
         ImGui::Checkbox(S(THPRAC_GAMES_APPLY_THPRAC), &inst->apply_thprac);
         ImGui::SameLine();
     }
@@ -1175,7 +1201,7 @@ static void ScanAddInstances(LauncherGame* game, FoundGame* found, size_t found_
         inst.path = _strdup(found[found_idx].path);
         inst.type = found[found_idx].info.type;
         inst.ver = (uint8_t)(found[found_idx].info.ver - game->versions);
-        inst.apply_thprac = found[found_idx].info.ver->initFunc && apply_thprac;
+        inst.apply_thprac = (found[found_idx].info.ver->initFunc || game->id == ID_TH06NC) && apply_thprac;
 
         inst_idx++;
     }
