@@ -6,7 +6,7 @@ An **unofficial fork of [thprac](https://github.com/touhouworldcup/thprac)** wit
 
 **[Download the latest release](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [Report an issue](https://github.com/zxxsmart/thprac-th06nc/issues)
 
-Current fork version: **1.0.0**. Based on thprac **2.3.1.1**, upstream commit `55e6ed1336621e3099e7df1138acc360cf0500fa`.
+Current fork version: **1.0.1**. Based on thprac **2.3.1.1**, upstream commit `55e6ed1336621e3099e7df1138acc360cf0500fa`.
 
 ## Install and use
 

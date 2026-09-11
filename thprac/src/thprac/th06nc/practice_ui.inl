@@ -27,6 +27,8 @@
             case 1:
                 SetFade(0.8f, 0.1f);
                 Open();
+                if (*mStage != MenuStage() || mDiffculty != std::clamp(MenuDifficulty(),0,3) || mShotType != MenuShot())
+                    *mSection = *mChapter = *mPhase = *mFrame = 0;
                 *mStage = MenuStage();
                 mDiffculty = std::clamp(MenuDifficulty(),0,3);
                 mShotType = MenuShot();
@@ -107,13 +109,13 @@
         {
             mMode();
             if (mStage())
-                *mSection = *mChapter = 0;
+                *mSection = *mChapter = *mPhase = *mFrame = 0;
             if (*mMode == 1) {
                 if (mWarp())
                     *mSection = *mChapter = *mPhase = *mFrame = 0;
                 if (*mWarp) {
                     if (*mStage == 3) {
-                        mFakeShot();
+                        if (mFakeShot()) *mSection = *mPhase = 0;
                     }
 
                     SectionWidget();
@@ -176,7 +178,6 @@
         }
         int CalcSection()
         {
-            if(*mStage==6 && (*mWarp==3||*mWarp==5))return ExtraSections(*mWarp==5)[*mSection];
             int chapterId = 0;
             switch (*mWarp) {
             case 1: // Chapter
@@ -188,12 +189,12 @@
                 break;
             case 2:
             case 3: // Mid boss & End boss
-                return th_sections_cba[*mStage][*mWarp - 2][*mSection];
-                break;
             case 4:
-            case 5: // Non-spell & Spellcard
-                return th_sections_cbt[*mStage][*mWarp - 4][*mSection];
-                break;
+            case 5: { // Non-spell & Spellcard
+                auto menu = BuildSectionMenu(*mStage, *mWarp, mShotType, *mFakeShot);
+                menu.Normalize(*mSection, SectionNames(mDiffculty));
+                return menu.values[*mSection];
+            }
             default:
                 return 0;
                 break;
@@ -219,19 +220,8 @@
         }
         void SectionWidget()
         {
-            if(*mStage==6 && (*mWarp==3||*mWarp==5)){
-                const auto* sections=ExtraSections(*mWarp==5);
-                if(mSection(TH_WARP_SELECT_FRAME[*mWarp],sections,SectionNames(mDiffculty)))*mPhase=0;
-                if(SectionHasDlg(sections[*mSection]))mDlg();
-                return;
-            }
             static char chapterStr[256] {};
             auto& chapterCounts = mChapterSetup[*mStage];
-
-            int st = 0;
-            if (*mStage == 3) {
-                st = (*mFakeShot ? *mFakeShot - 1 : mShotType) + 4;
-            }
 
             switch (*mWarp) {
             case 1: // Chapter
@@ -249,22 +239,17 @@
                 break;
             case 2:
             case 3: // Mid boss & End boss
-                if (mSection(TH_WARP_SELECT_FRAME[*mWarp],
-                    th_sections_cba[*mStage + st][*mWarp - 2],
-                    SectionNames(mDiffculty)))
-                    *mPhase = 0;
-                if (SectionHasDlg(th_sections_cba[*mStage][*mWarp - 2][*mSection]))
-                    mDlg();
-                break;
             case 4:
-            case 5: // Non-spell & Spellcard
-                if (mSection(TH_WARP_SELECT_FRAME[*mWarp],
-                    th_sections_cbt[*mStage + st][*mWarp - 4],
-                    SectionNames(mDiffculty)))
+            case 5: { // Non-spell & Spellcard
+                auto menu = BuildSectionMenu(*mStage, *mWarp, mShotType, *mFakeShot);
+                auto names = SectionNames(mDiffculty);
+                menu.Normalize(*mSection, names);
+                if (mSection(TH_WARP_SELECT_FRAME[*mWarp], menu.labels.data(), names))
                     *mPhase = 0;
-                if (SectionHasDlg(th_sections_cbt[*mStage][*mWarp - 4][*mSection]))
+                if (SectionHasDlg(menu.values[*mSection]))
                     mDlg();
                 break;
+            }
             case 6:
                 mFrame();
                 break;

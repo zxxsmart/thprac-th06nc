@@ -6,7 +6,7 @@
 
 **[下载最新版](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [反馈问题](https://github.com/zxxsmart/thprac-th06nc/issues)
 
-本分支版本 **1.0.0**，基于 thprac **2.3.1.1**，上游基线 `55e6ed1336621e3099e7df1138acc360cf0500fa`。
+本分支版本 **1.0.1**，基于 thprac **2.3.1.1**，上游基线 `55e6ed1336621e3099e7df1138acc360cf0500fa`。
 
 ## 使用
 

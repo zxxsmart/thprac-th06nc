@@ -6,7 +6,7 @@
 
 **[最新版をダウンロード](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [不具合報告](https://github.com/zxxsmart/thprac-th06nc/issues)
 
-フォークのバージョン: **1.0.0**。ベース: thprac **2.3.1.1**。
+フォークのバージョン: **1.0.1**。ベース: thprac **2.3.1.1**。
 
 ## 使い方
 

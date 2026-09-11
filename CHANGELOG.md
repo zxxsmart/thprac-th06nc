@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1 — 2026-09-11
+
+- Fix incorrect Extra spell names and out-of-bounds access in stage-four midboss, boss, nonspell and spell menus for all four shot types.
+- Separate menu label indices from practice/replay section IDs, preserving v1.0.0 replay compatibility.
+- Reset and normalize section selections when changing stage, shot branch or difficulty, including returning from a longer Extra menu.
+
 ## 1.0.0 — 2026-09-11
 
 First public release of the unofficial thprac-th06nc fork, based on upstream

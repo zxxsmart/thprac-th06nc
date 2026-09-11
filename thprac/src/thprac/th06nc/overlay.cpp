@@ -1,5 +1,6 @@
 #include "module.h"
 #include "spell_names.h"
+#include "section_menu.h"
 #include "thprac_gui_components.h"
 #include "imgui_internal.h"
 #include "imgui_impl_dx11.h"
@@ -14,21 +15,11 @@ constinit HotkeyChords hotkeys{};
 namespace THPrac::TH06NC {
 using namespace TH06;
 THPracParam thPracParam{};
-const int* ExtraSections(bool spells) {
-    static std::array<int,22> end{},cards{};
-    auto& list=spells?cards:end;
-    if(!list[0]){
-        const auto* original=spells?th_sections_cbt[6][1]:th_sections_cba[6][1];
-        size_t n=0;while(original[n]){list[n]=original[n];++n;}
-        for(int section=FragileWing;section<=DanmakuHeart;++section)list[n++]=section;
-    }
-    return list.data();
-}
 const char** SectionNames(int difficulty) {
-    static std::array<const char*,74> names{};
+    static std::array<const char*,SectionNameCount> names{};
     const th_glossary_t added[]={TH06NC_FRAGILE_WING,TH06NC_CREEPING_BLOODSTAIN,TH06NC_DANMAKU_HEART};
     auto locale=Gui::LocaleGet();
-    for(int i=0;i<FragileWing;++i) {
+    for(int i=0;i<OriginalSectionNameCount;++i) {
         names[i]=th_sections_str[locale][difficulty][i];
         if(locale!=LOCALE_ZH_CN) {
             const auto* original=th_sections_str[LOCALE_JA_JP][difficulty][i];
@@ -37,7 +28,7 @@ const char** SectionNames(int difficulty) {
             }
         }
     }
-    for(int i=0;i<3;++i)names[FragileWing+i]=S(added[i]);
+    for(int i=0;i<3;++i)names[OriginalSectionNameCount+i]=S(added[i]);
     return names.data();
 }
 #include "practice_ui.inl"

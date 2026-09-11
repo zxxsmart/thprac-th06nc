@@ -1,4 +1,4 @@
-# thprac-th06nc 1.0.0：红魔乡新典非官方分支
+# thprac-th06nc 1.0.1：红魔乡新典非官方分支
 
 [thprac 的非官方分支](https://github.com/zxxsmart/thprac-th06nc)，基于 [touhouworldcup/thprac](https://github.com/touhouworldcup/thprac) 2.3.1.1。新典的启动入口、选段设置和暂停菜单均接入现有 thprac；其他游戏使用原有模块。
 
@@ -21,7 +21,7 @@
 
 启动器仍是原有 32 位 thprac，内嵌桥接程序负责加载新典所需的 64 位模块。开发用多文件目录 `build\thprac-nc` 也保留，其中的 `thprac.exe` 仍需要同目录的桥接程序和 DLL。
 
-本分支只提供手动更新：程序中的“下载本分支更新”打开[本仓库 Releases](https://github.com/zxxsmart/thprac-th06nc/releases/latest)。下载新 EXE，关闭游戏和启动器后替换。单文件版和多文件版均不再检查、下载或安装上游更新。项目主页、反馈入口均指向本分支，上游链接另有明确标识。当前独立版本为 1.0.0；上游版本号单独显示，保留原游戏录像版本语义。
+本分支只提供手动更新：程序中的“下载本分支更新”打开[本仓库 Releases](https://github.com/zxxsmart/thprac-th06nc/releases/latest)。下载新 EXE，关闭游戏和启动器后替换。单文件版和多文件版均不再检查、下载或安装上游更新。项目主页、反馈入口均指向本分支，上游链接另有明确标识。当前独立版本为 1.0.1；上游版本号单独显示，保留原游戏录像版本语义。
 
 原项目按 MIT 许可使用；完整版权与第三方许可见 `LICENCE` 和 `THIRD_PARTY_NOTICES.txt`，单文件版内嵌并可从许可证界面查阅。本软件部分基于 FreeType 团队的工作，按 FTL 使用 FreeType。本工具不代表游戏开发商、发行商、thprac 上游或 TWC，不包含游戏程序、资源包、图像、音乐或字体文件。新典适配使用了 AI 辅助开发与本地运行测试。
 
