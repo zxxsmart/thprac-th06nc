@@ -1,237 +1,60 @@
-## [简体中文](/README_CN.md) [日本語](/README_JP.md)
+# thprac-th06nc
 
-# **thprac**
-> thprac is a tool for practicing Touhou shmups.
+[简体中文](README_CN.md) | [日本語](README_JP.md)
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/V7V7O03J4)
+An **unofficial fork of [thprac](https://github.com/touhouworldcup/thprac)**, maintained by [zxxsmart](https://github.com/zxxsmart), adding practice support for the Steam edition of **Touhou Koumakyou: New Classic**.
 
-## [Download](https://github.com/touhouworldcup/thprac/releases/latest) - [Download Beta](https://nightly.link/touhouworldcup/thprac/workflows/main/master/thprac.zip)
-> Note that beta versions will only update to the next stable version, not the next beta version.
+**[Download the latest release](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [Report an issue](https://github.com/zxxsmart/thprac-th06nc/issues)
 
-## **Table of Contents**
-* [Downloading](#downloading)
-* [Usage](#usage)
-* [Compatability](#compatability)
-* [Features](#-features)
-* [Quick Menu](#quick-menu)
-* [Advanced Options](#advanced-options)
-* [Game Specific Features](#game-specific-features)
-* [Credits](#credits)
-* [Building from Source](#building-from-source)
-* [FAQ](#faq)
+Current fork version: **1.0.0**. Based on thprac **2.3.1.1**, upstream commit `55e6ed1336621e3099e7df1138acc360cf0500fa`.
 
-## <a name="downloading"></a> **Downloading**
-If you want to download the tool, you can download the [latest release](https://github.com/touhouworldcup/thprac/releases/latest) here and the [latest beta](https://nightly.link/touhouworldcup/thprac/workflows/main/master/thprac.zip) here. Do note that the latest beta will update into the next stable release and NOT the next beta release.
+## Install and use
 
-## <a name="usage"></a> **Usage**
-You can use this tool in a variety of ways; the main ways to do this are **placing the executable in the same folder as your game**, **running the executable after running your game**, or **using thprac's launcher**.
+1. Download `thprac-th06nc.exe` from this fork's Releases. No additional DLL downloads are needed.
+2. Run it, select the New Classic Steam instance, enable thprac, and launch.
+3. In the game, select **Practice Start → difficulty, character, stage → practice settings → Z**.
 
-### **thprac in the Game Folder**
-**This method will NOT work with Steam games.** You can run thprac by placing the `thprac.exe` file in the same folder as your game. This method will also automatically detect vpatch. You must ensure that the game is updated to the latest version and follows one of the following naming schemes. This method also works with vpatch.
-- thXX.exe (most games)
-- 東方紅魔郷.exe (Embodiment of Scarlet Devil)
-- alcostg.exe (Uwabami Breakers)
+Supported game: **Steam th06nc 1.03**, Windows x64. The exact executable SHA-256 is checked before injection:
 
-### **thprac after Running the Game**
-**This method will work for most methods.** First, run the game in whichever method you want (whether it's thcrap, using vpatch, Steam, etc.) and then run `thprac.exe`. thprac will then detect the running game and attempt to attach itself to it. You may have to return to the menu screen to see thprac take effect.
-
-### **thprac Using the Launcher**
-This video explains how to use the launcher.
-[![A quick and dirty overview of thprac 2.0](https://i.ytimg.com/vi/sRV4PDQceYo/maxresdefault.jpg)](https://www.youtube.com/watch?v=sRV4PDQceYo)
-
-### Command line
-The following command line options are supported:
-- `<path to game exe>` The command `thprac.exe <path to game exe>` will run a game and attach thprac without any confirmation prompt. This makes it possible to drag a Touhou game executable onto thprac.exe and it will run with thprac. Note that if you place more command line parameters after `<path to game exe>`, those parameters will be forwarded to the game exe. This is completely useless because ZUN does not use command line parameters.
-- `--attach <pid>` immediately inject thprac into a process with ID `<pid>` without any confirmation prompts.
-- `--attach` (without any other flags). The command `thprac.exe --attach` will attach thprac to the first Touhou game process it finds without opening any kind of confirmation prompt.
-- `--without-vpatch` Prevent automatically applying vpatch.
-- `--without-oilp` Prevent automatically applying OpenInputLagPatch.
-
-Small note about the last two flags: if neither of them are specified, but both vpatch and OpenInputLagPatch are present, OpenInputLagPatch will take priority.
-
-Example commands:
-```
-thprac.exe --attach 1234
-thprac.exe --attach
-thprac.exe C:\Users\Name\Desktop\Games\Touhou\th17\th17.exe
-thprac.exe --without-vpatch C:\Users\Name\Desktop\Games\Touhou\th12\th12.exe
+```text
+07850c8c6e469c0e82c13423e6d0d096a88d693455bdacacbb44c0aa3bcce473
 ```
 
-## <a name="compatability"></a> **Compatability**
-thprac officially supports every version of Windows starting with **Windows Vista**. Windows XP may work using [One-Core-API](https://github.com/Skulltrail192/One-Core-API-Binaries), but this is **NOT** being actively tested.
+Game updates may require a new adapter release. You must own and install the game separately.
 
-thprac is also compatible with **Wine** and the Steam Deck. Do note that the Quick Menu is tailored to work well with the Steam Deck, although this is untested.
+## Practice features
 
-## <a name="features"></a> **Features**
+- TH06-style stage portions and boss attacks: 73 boss selections and 40 stage portions, including the three new Extra spells.
+- Normal stage-practice flow, with later attacks continuing after the selected spell.
+- Starting resources, optional custom Rank, dialogue and supported attack phases. Rank defaults to the game's native fixed value.
+- Esc: resume, exit, retry or edit settings. Backspace: compact keyboard-only F1–F7 status panel. F12: game speed.
+- Chinese, English and Japanese UI follows the launcher's language. New Classic's official English/Japanese spell names are used.
+- Native replay-save confirmation after exiting or finishing practice. Keep both `.rpy` and `.rpy.thprac-nc`; NC replay metadata uses v7.
 
-thprac features an enhanced practice mode that supports all main games along with Great Fairy Wars and Uwabami Breakers.
+The other game modules remain based on upstream thprac. This release's runtime validation focuses on New Classic; it is **not an official thprac/Touhou World Cup build**.
 
-![Unconnected Marketeers](https://user-images.githubusercontent.com/23106652/174433923-0a6069e7-d10d-4107-8f0d-f4a8a9d56976.png)
+## Updates
 
-![Imperishable Night](https://user-images.githubusercontent.com/23106652/174433975-8f23b0b0-e48e-4be1-8cb7-d8e3e7ab6b8e.png)
+Updates are **manual**. The launcher opens this fork's Releases page in your browser. Download the new EXE, close the game and launcher, and replace your copy. There are no background version requests, automatic downloads or executable replacement.
 
-thprac replaces the original practice menu with a new UI shown in the image above; certain spells allow you to select phases or change certain parameters. For the games without an original practice mode (Uwabami Breakers, Great Fairy War, etc.), a practice menu is added to the "Start Game" menu.
+The EXE embeds its native module, bridge, dependencies, documentation and licenses. When launching New Classic, it extracts verified files to `%LOCALAPPDATA%\thprac\th06nc\<content-hash>\`. Windows fonts are read locally at runtime.
 
-![Uwabami Breakers](https://user-images.githubusercontent.com/23106652/174434103-5fee7a13-0254-4602-a468-42330b985bb2.png)
-![Great Fairy Wars](https://user-images.githubusercontent.com/23106652/174434121-063142f2-ef3d-4721-ab96-a252343cdb0e.png)
+## Source and build
 
-This menu can be controlled using your keyboard or your controller. Using this, you can select options using the **UP** and **DOWN** keys and change the option using the **LEFT** and **RIGHT** keys and the **SHOT** key to select. You can also use your mouse to interact with the menu.
+Use Visual Studio 2022 with C++ tools, ClangCL and Windows SDK, CMake 3.24+, and Python 3.8+:
 
-thprac will also automatically save the options you selected into any replay saved. When playing back the replay, thprac will automatically apply said options. **Replays saved while thprac is active using "Custom" mode will NOT work with the unmodified game.**
-
-## <a name="quick-menu"></a> **Quick Menu**
-In any supported game **(except Touhou 9 and 19)**, you can press the **`Backspace`** key to enter the Quick Menu. This menu shows a variety of options that can be activated using the function (F) keys.
-
-These options are always clickable, meaning you can interact with them using a mouse on a desktop computer or by tapping on them with your left thumb when using a Steam Deck. To use this feature on the Steam Deck, map the **`Backspace`** key in Steam Input.
-
-The hotkey for this menu can be changed from the launcher's settings tab to a different key or combination of keys if you want it bound to something else.
-
-![Unconnected Marketeers](https://user-images.githubusercontent.com/23106652/174434813-73748a66-0f6d-4c6e-9f3a-895a49b93434.png)
-![Wily Beast and Weakest Creature](https://user-images.githubusercontent.com/23106652/174434834-6bd93104-1ed2-48ae-a440-9d9cb871ea03.png)
-
-## <a name="advanced-options"></a> **Advanced Options**
-In any supported game **(except Touhou 9 and 19)**, you may use the **`F12`** key to access the Advanced Options; these options may offer fixes or patches related to the game or other quality of life features.
-
-Like the Quick Menu, the hotkey for this can also be changed from the launcher's settings tab.
-
-![Imperishable Night](https://user-images.githubusercontent.com/23106652/174434977-683da583-324b-4bd5-8408-13373dfd5a93.png)
-![Unconnected Marketeers](https://user-images.githubusercontent.com/23106652/174435006-e906d30d-0ef5-4930-ae57-1f0919beb5af.png)
-
-## <a name="game-specific-features"></a> **Game-specific Features**
-### 100th BM - Force Wave
-![100th Black Market](https://github.com/touhouworldcup/thprac/assets/23106652/02c55e5e-5c89-462f-beea-9ab07cbb1051)
-
-If thprac is enabled using "Custom" mode, the popup above will appear when the game is about to choose a wave.
-
-### PoFV - Tools
-![Phantasmagoria of Flower View](https://user-images.githubusercontent.com/23106652/174434249-2bf1d70a-101c-4538-a4e6-8eeaf273dd88.png) 
-
-When starting a game in Match Mode, you can select "Custom" in a "Mode" prompt. If you do that, this window will appear in your game. You can move and adjust this window as much as you want. This replaces Advanced Options and can be opened with **`F12`**. 
-
-### UDoALG - Tools
-![TH19 Tools](https://github.com/touhouworldcup/thprac/assets/23106652/a2cdb385-b61d-4111-af6b-b195e85bf18a)
-
-It's just like PoFV Tools, but for UDoALG.
-
-### EoSD - Pause Menu
-![TH06](https://user-images.githubusercontent.com/23106652/174436027-734d642a-300c-45ab-9591-b6219aca087b.png)
-
-Choosing "Exit" will now prompt you to save a replay. 
-
-**Warning**: replays saved like this will continue after the point you chose to save the replay. The player character will stand still and not shoot.
-
-### ESC + R fix for EoSD, VD and beyond
-
-## <a name="credits"></a> **Credits (post May 27th, 2022)**
-- Development: [32th System](https://www.youtube.com/channel/UChyVpooBi31k3xPbWYsoq3w), [muter3000](https://github.com/muter3000), [zero318](https://github.com/zero318), [Lmocinemod](https://github.com/Lmocinemod), [Cao Minh](https://github.com/hoangcaominh), [raviddog](https://github.com/raviddog) 
-- Chinese translations: [CrestedPeak9](https://twitter.com/CrestedPeak9), maksim71_doll, DeepL
-- Japanese translations: [Yu-miya](https://www.twitch.tv/toho_yumiya), [SOC](https://github.com/soc-3), [wefma](https://github.com/wefma), CyrusVorazan, DeepL
-- Moving all reports from the [old bugtracker](https://github.com/ack7139/thprac/issues) [here](https://github.com/touhouworldcup/thprac/issues): [toimine](https://www.youtube.com/channel/UCtxu8Rg0Vh8mX6iENenetuA)
-- English README.md: [Galagyy](https://github.com/Galagyy)
-- Chinese README.md translation: [TNT569](https://github.com/TNT569), [H-J-Granger](https://github.com/H-J-Granger)
-- Japanese README.md translation: [wefma](https://github.com/wefma)
-
-## <a name="building-from-source"></a> **Building from Source**
-### First time setup (only needs to be performed once)
-Inside the folder named thprac, compile loc_json.cpp into loc_json.exe in whatever way you like most. I recommend this command
-```
-cl /Isrc\3rdparties\yyjson /nologo /EHsc /O2 /std:c++20 loc_json.cpp .\src\3rdParties\yyjson\yyjson.c /Fe:loc_json.exe
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build.ps1 -SingleFile -Python python
 ```
 
-### Building on the command line
-In a Visual Studio Developer Command Prompt, run the following command
-```
-msbuild thprac.sln -t:restore,build -p:RestorePackagesConfig=true,Configuration=Release
-```
+Output: `build/single/thprac-th06nc.exe`. The build includes both the Win32 launcher and x64 NC module. Extracted game files are not required to compile the adapter.
 
-### Building from the Visual Studio GUI
-Open `thprac.sln` click on "Build", then "Build solution"
+[Detailed usage/build notes](README_NC.md) · [Validation scope and evidence](VALIDATION_NC.md) · [Release notes](CHANGELOG.md)
 
-## <a name="faq"></a> **Frequently Asked Questions (FAQ)**
+## Attribution and licenses
 
-### General
+Original thprac: Copyright (c) 2022 Ack and thprac contributors, [MIT License](LICENCE). Third-party components retain their own licenses; see [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). This software is based in part on the work of the FreeType Team and uses FreeType under the FTL.
 
-#### Why did thprac move?
-The original developer, Ack, has indefinitely ceased all future development of thprac/Marketeer. Below is their statement:
-> I will indefinitely cease all future development on thprac/Marketeer, you are free to continue working on it, granting that you follow the license's terms.  
-> Due to my insufficient skill, the code is glutted with obscure writings and terrible logic, turning the whole thing into a complete mess. I'm sorry if that disturbs you.  
+Touhou Project and the supported game belong to Team Shanghai Alice and their respective rights holders. This is an unofficial fan-made practice tool, not endorsed by the game developers, publisher, thprac maintainers or TWC. No game executable, archive, graphics, music or font files are distributed with the tool.
 
-Ack cannot be contacted at this time, and development has been taken over by others.
-
-#### My antivirus says thprac is malware. Is it safe?
-Thprac contains no malicious code, but its behavior may trigger your antivirus. If flagged, add an exception or trust rule in your antivirus to allow thprac to work. Alternatively, you can try [this version](https://github.com/touhouworldcup/thprac/issues/112) and report back if the issue persists.
-
----
-
-### Compatibility
-
-#### Does thprac work with English patches?
-Thprac is compatible with **thcrap** and can function as a thcrap launcher, similar to the [Universal THCRAP Launcher](https://github.com/thpatch/Universal-THCRAP-Launcher/). It does not support static English patches, like those created by gensokyo.org.
-
----
-
-#### thprac cannot find Embodiment of Scarlet Devil. What should I do?
-
-Ensure your executable is named either `東方紅魔郷.exe` or `th06.exe`. If thprac still fails to detect it, you can manually launch the game with any filename through the launcher, which will attach thprac to the game.
-
----
-
-### Features
-
-#### How do I save a replay mid-game in TH06-10?
-Saving replays mid-game is not supported due to technical limitations. As per the thprac 2.0.8.3 manual:
-> Because of how these games were programmed, adding this feature would be quite troublesome, so currently there's no direct solution to this.  
-
-However, EoSD now supports this functionality.
-
-Note: replays saved mid-game do not return to the title screen after the save point.
-
----
-
-#### What does "Everlasting BGM" mean?
-This option prevents the background music (BGM) from resetting when you restart the game.
-
----
-
-#### What does "Coercive Reporting" mean? (Shoot the Bullet/Double Spoiler)
-This feature locks the camera onto the boss at all times and eliminates the camera's recharge time.
-
----
-
-#### How do I switch languages?
-- The launcher automatically selects its language based on your Windows settings.  
-- To change the language in-game, use the shortcuts:  
-  - **`ALT + 1`**: Japanese 
-  - **`ALT + 2`**: Chinese 
-  - **`ALT + 3`**: English 
-
-The hotkey for changing languages can be changed from the launcher's settings tab.
-
-These shortcuts do not work in the launcher itself. Refer to the video in the **"How to Use"** section for detailed instructions.
-
----
-
-### Bug Reporting
-
-#### Where can I report bugs?
-Visit the [Issues tab on GitHub](https://github.com/touhouworldcup/thprac/issues) to report bugs or suggest improvements.
-
----
-
-### Technical Issues
-
-#### Unsupported VsyncPatch version in advanced options
-Ensure you're using a compatible version of VsyncPatch. You can download it from [here](https://maribelhearn.com/tools#vpatch). Use DLLs from **rev7** whenever possible.
-
----
-
-#### FPS adjustment seems to be broken when using vpatch
-
-Some tools, like "DX8 to DX9 Converter," conflict with VsyncPatch. Replay speed adjustment (slowdown/speedup) is only supported in **TH13**.
-
----
-
-### Game-Specific
-
-#### What is "DDC - Marisa Laser Related"?
-This fixes the infamous Marisa laser desync bug in **Double Dealing Character (TH14)**. Please refer to the original developer, Ack's [demonstration video on Bilibili](https://www.bilibili.com/video/av285566068) (in Chinese, [backup video link on YouTube](https://www.youtube.com/watch?v=Hkh_AEGHLto))
+The NC adapter was developed with AI assistance and local runtime testing. This fork has its own issue tracker and releases; upstream contribution policies remain documented in [the upstream contribution guide](docs/upstream/CONTRIBUTING.md).

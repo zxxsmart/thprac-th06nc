@@ -1,6 +1,6 @@
-# thprac：红魔乡新典分支
+# thprac-th06nc 1.0.0：红魔乡新典非官方分支
 
-本地 fork 基于 [touhouworldcup/thprac](https://github.com/touhouworldcup/thprac) 的 `55e6ed1336621e3099e7df1138acc360cf0500fa`，分支为 `feature/th06nc`。新典的入口、游戏内选段菜单、暂停菜单和练习参数均接入现有 thprac；旧游戏仍使用原有模块。
+由 zxxsmart 维护的[非官方 fork](https://github.com/zxxsmart/thprac-th06nc)，基于 [touhouworldcup/thprac](https://github.com/touhouworldcup/thprac) 2.3.1.1 的 `55e6ed1336621e3099e7df1138acc360cf0500fa`。新典的入口、游戏内选段菜单、暂停菜单和练习参数均接入现有 thprac；旧游戏仍使用原有模块。
 
 ## 使用
 
@@ -19,7 +19,11 @@
 
 单文件版内嵌桥接程序、模块、字体依赖、说明和许可证。启动新典时自动释放到 `%LOCALAPPDATA%\thprac\th06nc\<内容摘要>\`，逐项校验并恢复缺失或损坏的文件。用户不需要手动放置 DLL，程序也不将依赖释放到游戏安装目录。该目录是可重新生成的缓存；关闭游戏后可以清理。
 
-启动器仍是原有 32 位 thprac，内嵌桥接程序负责加载新典所需的 64 位模块。开发用多文件目录 `build\thprac-nc` 也保留，其中的 `thprac.exe` 仍需要同目录的桥接程序和 DLL。单文件分支不接受上游更新程序直接覆盖，请用此分支的新 EXE 更新。
+启动器仍是原有 32 位 thprac，内嵌桥接程序负责加载新典所需的 64 位模块。开发用多文件目录 `build\thprac-nc` 也保留，其中的 `thprac.exe` 仍需要同目录的桥接程序和 DLL。
+
+本分支只提供手动更新：程序中的“下载本分支更新”打开[本仓库 Releases](https://github.com/zxxsmart/thprac-th06nc/releases/latest)。下载新 EXE，关闭游戏和启动器后替换。单文件版和多文件版均不再检查、下载或安装上游更新。项目主页、反馈入口均指向本分支，上游链接另有明确标识。当前独立版本为 1.0.0；上游版本号单独显示，保留原游戏录像版本语义。
+
+原项目按 MIT 许可使用；完整版权与第三方许可见 `LICENCE` 和 `THIRD_PARTY_NOTICES.txt`，单文件版内嵌并可从许可证界面查阅。本软件部分基于 FreeType 团队的工作，按 FTL 使用 FreeType。本工具不代表游戏开发商、发行商、thprac 上游或 TWC，不包含游戏程序、资源包、图像、音乐或字体文件。新典适配使用了 AI 辅助开发与本地运行测试。
 
 当前适配本地 Steam **th06nc 1.03**，EXE SHA-256：`07850c8c6e469c0e82c13423e6d0d096a88d693455bdacacbb44c0aa3bcce473`。启动时核对完整哈希；游戏更新后需要重新适配地址及脚本映射。
 

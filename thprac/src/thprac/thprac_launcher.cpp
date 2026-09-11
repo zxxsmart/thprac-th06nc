@@ -4,6 +4,7 @@
 #include "thprac_launcher.h"
 #include "thprac_licence.h"
 #include "thprac_load_exe.h"
+#include "thprac_fork.h"
 
 #include <psapi.h>
 
@@ -17,7 +18,11 @@ namespace Gui {
     extern IDirect3DDevice9* ImplDX9GetDevice();
 }
 
-static const wchar_t* LAUNCHER_TITLE_W[] = { L"thprac - 东方游戏启动器", L"thprac - Touhou Game Launcher", L"thprac - 東方ゲームランチャー" };
+static const wchar_t* LAUNCHER_TITLE_W[] = {
+    L"thprac-th06nc v" THPRAC_FORK_VERSION L" - 东方游戏启动器",
+    L"thprac-th06nc v" THPRAC_FORK_VERSION L" - Touhou Game Launcher",
+    L"thprac-th06nc v" THPRAC_FORK_VERSION L" - 東方ゲームランチャー"
+};
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -283,9 +288,19 @@ static void LauncherSettingsMain(LauncherState* state) {
     ImGui::NewLine();
     ImGui::TextUnformatted(S(TH_ABOUT_THPRAC));
     ImGui::Separator();
-    ImGui::Text(S(TH_ABOUT_VERSION), VER_PARAMS_CUR);
-    if (ImGui::Button(S(TH_VISIT_WEBSITE))) {
-        ShellExecuteW(Gui::ImplWin32GetHwnd(), L"open", L"https://github.com/touhouworldcup/thprac", nullptr, nullptr, SW_SHOW);
+    ImGui::Text("thprac-th06nc v%s", THPRAC_FORK_VERSION);
+    ImGui::TextUnformatted(S(TH06NC_UNOFFICIAL));
+    ImGui::Text(S(TH06NC_UPSTREAM_VERSION), VER_PARAMS_CUR);
+    if (ImGui::Button(S(TH06NC_PROJECT_PAGE))) {
+        ShellExecuteA(Gui::ImplWin32GetHwnd(), "open", THPRAC_FORK_REPOSITORY, nullptr, nullptr, SW_SHOW);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(S(TH06NC_ISSUES))) {
+        ShellExecuteA(Gui::ImplWin32GetHwnd(), "open", THPRAC_FORK_ISSUES, nullptr, nullptr, SW_SHOW);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(S(TH06NC_UPSTREAM))) {
+        ShellExecuteA(Gui::ImplWin32GetHwnd(), "open", THPRAC_UPSTREAM_REPOSITORY, nullptr, nullptr, SW_SHOW);
     }
     ImGui::SameLine();
     if (ImGui::Button(S(TH_ABOUT_SHOW_LICENCE))) {
@@ -319,8 +334,8 @@ void UiUpdate(HWND hwnd, LauncherState* state) {
         ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::PopStyleVar();
 
-    const char* title = background_update_check->hThread ? S(THPRAC_LAUNCHER_CHECKING_UPDATE) : S(THPRAC_LAUNCHER);
-    float begin_height = DrawTitleBar(hwnd, &state->g_IsOverTitleBarButton, title);
+    std::string title = std::string(S(THPRAC_LAUNCHER)) + " v" THPRAC_FORK_VERSION;
+    float begin_height = DrawTitleBar(hwnd, &state->g_IsOverTitleBarButton, title.c_str());
     ImGui::BeginChild("###__content", { io.DisplaySize.x, io.DisplaySize.y - begin_height }, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
     ImGui::BeginTabBar("__launcher_tab_bar");
 
@@ -362,120 +377,6 @@ void UiUpdate(HWND hwnd, LauncherState* state) {
     }
 
     ImGui::EndChild();
-
-    bool openUpdateError = false;
-    if (background_update_check && background_update_check->hThread) {
-        DWORD waitStatus = WaitForSingleObject(background_update_check->hThread, 0);
-
-        if (waitStatus == WAIT_OBJECT_0) {
-            DWORD exitCode = 0xFFFFFFFF;
-            GetExitCodeThread(background_update_check->hThread, &exitCode);
-
-            if (exitCode == 0) {
-                if (background_update_check->updateJson.ver > gVersion) {
-                    ImGui::OpenPopup(S(THPRAC_UPDATE_MODAL));
-                }
-            }
-            else {
-                openUpdateError = true;
-                state->updateError = THPRAC_CHECK_UPDATE_ERROR;
-            }
-            CloseHandle(background_update_check->hThread);
-            background_update_check->hThread = NULL;
-        }
-    }
-    ImGui::SetNextWindowSize({ 355.0f * g_Scale, 128.0f * g_Scale });
-    if (Gui::Modal(S(THPRAC_UPDATE_MODAL))) {
-        if (state->hUpdateThread) {
-            ImGui::TextUnformatted(S(THPRAC_UPDATE_DOWNLOADING));
-            
-            if (state->updateDownload.filesize) {
-                float prog = (float)state->updateDownload.out.size() / (float)state->updateDownload.filesize;
-
-                char txt[16] = {};
-                char* txt_end = txt + snprintf(txt, 15, "%.2f%%", prog * 100);
-                Gui::ProgressBar(prog, txt, txt_end);
-            } else {
-                Gui::ProgressBar(0.0f, "0.0%");
-            }
-            ImGui::SetCursorPosY(ImGui::GetWindowHeight() - (ImGui::GetFontSize() + style.FramePadding.y * 2 + style.ItemSpacing.y * 2));
-
-            if (ImGui::Button(S(TH_CANCEL))) {
-                state->updateDownload.abort_signal = true;
-            }
-
-            DWORD waitStatus = WaitForSingleObject(state->hUpdateThread, 0);
-            if (waitStatus == WAIT_OBJECT_0) {
-                DWORD exitCode = 0xFFFFFFFF;
-                GetExitCodeThread(state->hUpdateThread, &exitCode);
-                CloseHandle(state->hUpdateThread);
-                state->hUpdateThread = NULL;
-                if (exitCode == 0) {
-                    if (!CompleteUpdate(state->updateDownload.out.data(), state->updateDownload.out.size(), nullptr, SW_SHOW, &background_update_check->updateJson)) {
-                        ImGui::CloseCurrentPopup();
-                        openUpdateError = true;
-                        state->updateDownload.out.clear();
-                        state->updateError = THPRAC_UPDATE_COMPLETION_ERROR;
-                    }
-                    PostQuitMessage(0);
-                } else {
-                    state->updateDownload.out.clear();
-                    ImGui::CloseCurrentPopup();
-
-                    if (exitCode != 0x80000000) {
-                        openUpdateError = true;
-                        state->updateError = THPRAC_UPDATE_DOWNLOAD_ERROR;
-                    }
-                }
-            }
-            else if (waitStatus != WAIT_TIMEOUT) {
-                ImGui::CloseCurrentPopup();
-                state->updateDownload.out.clear();
-                state->updateError = THPRAC_UPDATE_DOWNLOAD_ERROR;
-            }
-        } else {
-            ImGui::Text(S(THPRAC_UPDATE_PROMPT), VER_PARAMS(background_update_check->updateJson.ver));
-            switch (Gui::MultiButtonsFillWindow(0.0f, S(THPRAC_UPDATE_AUTO_UPDATE), S(THPRAC_UPDATE_DOWNLOAD_MANUALLY))) {
-            case 0:
-            do_the_update:
-                state->updateUrl = utf8_to_utf16(background_update_check->updateJson.url);
-                state->updateDownload.url = state->updateUrl.c_str();
-                state->updateDownload.abort_signal = false;
-                state->hUpdateThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)DownloadFile, &state->updateDownload, 0, nullptr);
-                break;
-            case 1:
-                ShellExecuteA(Gui::ImplWin32GetHwnd(), "open", background_update_check->updateJson.url, nullptr, nullptr, SW_SHOW);
-            case -1:
-                if (gSettings.update_without_confirmation && !state->hUpdateThread) {
-                    goto do_the_update;
-                }
-            }
-            switch (Gui::MultiButtonsFillWindow(0.0f, S(THPRAC_UPDATE_VIEW_CHANGELOG), S(TH_CLOSE))) {
-            case 0:
-                ShellExecuteA(Gui::ImplWin32GetHwnd(), "open", background_update_check->updateJson.changelog, nullptr, nullptr, SW_SHOW);
-                break;
-            case 1:
-                ImGui::CloseCurrentPopup();
-            }
-        }
-        ImGui::EndPopup();
-    }
-
-    if (Gui::Modal(S(THPRAC_UPDATE_ERROR_MODAL))) {
-        ImGui::TextUnformatted(S(state->updateError));
-        ImGui::TextUnformatted(S(THPRAC_UPDATE_ASK_DISABLE));
-        switch (Gui::MultiButtonsFillWindow(0.0f, S(TH_YES), S(TH_NO))) {
-        case 0:
-            gSettings.check_update = CHECK_UPDATE_NEVER;
-        case 1:
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
-    }
-
-    if (openUpdateError) {
-        ImGui::OpenPopup(S(THPRAC_UPDATE_ERROR_MODAL));
-    }
 
     ImGui::End();
     ImGui::EndFrame();
@@ -686,9 +587,6 @@ int Launcher(HINSTANCE hInstance, int nCmdShow) {
         return 1;
     }
 
-    if (UpdaterInitialized() && gSettings.check_update == CHECK_UPDATE_LAUNCHER) {
-        background_update_check->hThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)DownloadFile, background_update_check, 0, nullptr);
-    }
 
     int width = (int)(960.0f * dpiscale), height = (int)(720.0f * dpiscale);
     MONITORINFO mi = {

@@ -1,5 +1,6 @@
 ﻿#include "winres.h"
 #include "src/thprac/thprac_version.h"
+#include "src/thprac/thprac_fork.h"
 
 #define STRR(X) #X
 #define STR(X) STRR(X) 
@@ -7,20 +8,20 @@
 1 ICON "icon.ico"
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION THPRAC_VERSION_0,THPRAC_VERSION_1,THPRAC_VERSION_2,THPRAC_VERSION_3
- PRODUCTVERSION THPRAC_VERSION_0,THPRAC_VERSION_1,THPRAC_VERSION_2,THPRAC_VERSION_3
+ FILEVERSION THPRAC_FORK_VERSION_NUMBERS
+ PRODUCTVERSION THPRAC_FORK_VERSION_NUMBERS
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
         BLOCK "040004b0"
         BEGIN
-            VALUE "FileVersion", STR(THPRAC_VERSION_0) "." STR(THPRAC_VERSION_1) "." STR(THPRAC_VERSION_2) "." STR(THPRAC_VERSION_3)
-            VALUE "ProductVersion", STR(THPRAC_VERSION_0) "." STR(THPRAC_VERSION_1) "." STR(THPRAC_VERSION_2) "." STR(THPRAC_VERSION_3)
-			VALUE "FileDescription", "Touhou Practice Tool"
-			VALUE "InternalName", "thprac.exe"
-            VALUE "OriginalFilename", "thprac.exe"
-            VALUE "ProductName", "thprac"
-			VALUE "LegalCopyright", "All thprac developers"
+            VALUE "FileVersion", THPRAC_FORK_VERSION
+            VALUE "ProductVersion", THPRAC_FORK_VERSION
+			VALUE "FileDescription", "thprac-th06nc - Unofficial Touhou Practice Tool"
+			VALUE "InternalName", "thprac-th06nc.exe"
+            VALUE "OriginalFilename", "thprac-th06nc.exe"
+            VALUE "ProductName", "thprac-th06nc"
+			VALUE "LegalCopyright", "Copyright (c) 2022 Ack; thprac and th06nc fork contributors"
         END
     END
     BLOCK "VarFileInfo"

@@ -1,0 +1,92 @@
+{
+  "version": "1.0.0",
+  "native_status": {
+    "settings": {
+      "enabled": 1,
+      "stage": 1,
+      "difficulty": 3,
+      "shot": 0,
+      "spell": -1,
+      "frame": 0,
+      "lives": 8,
+      "bombs": 8,
+      "power": 128,
+      "graze": 0,
+      "point": 0,
+      "rank": 32,
+      "score": 0,
+      "flags": 1,
+      "restart": 0,
+      "fakeShot": -1,
+      "section": 3,
+      "phase": 0,
+      "dialogue": 0,
+      "fps": 60,
+      "reserved": 0
+    },
+    "status": {
+      "ready": 1,
+      "error": 0,
+      "stage": 1,
+      "difficulty": 3,
+      "frame": 5096,
+      "lives": 7,
+      "bombs": 3,
+      "power": 112,
+      "rank": 32,
+      "starts": 1,
+      "score": 500,
+      "flags": 1,
+      "exports": 0,
+      "misses": 1,
+      "bombsUsed": 0,
+      "message": "练习参数已应用"
+    },
+    "language": 1
+  },
+  "native_memory": {
+    "state": 2,
+    "practice": 1,
+    "spellPractice": 0,
+    "enemies": [
+      {
+        "index": 0,
+        "hp": 7000,
+        "sub": 16,
+        "age": 262,
+        "boss": true,
+        "var5": 0,
+        "float3": 0.0,
+        "lifeCallback": 26
+      }
+    ],
+    "playerState": 3,
+    "bombActive": 0,
+    "bgmPath": "data/bgm/th06_03.opus",
+    "graze": 1,
+    "point": 0,
+    "timer": 30,
+    "misses": 1,
+    "bombsUsed": 0,
+    "fps": 60.0,
+    "replay": 0,
+    "bgmHandle": 218103870,
+    "deathWindow": 8,
+    "dialogue": -1,
+    "shot": 0,
+    "invulnerabilityTimer": 1,
+    "gameOver": 0,
+    "stageTitleScript": 0,
+    "stageTitleVisible": 0
+  },
+  "checks": [
+    "ReleaseLLVM / x64 Release build",
+    "PE version 1.0.0 and fork identity",
+    "11 embedded files match build payloads",
+    "No upstream update URLs or WinInet/WinHTTP imports",
+    "Legacy always-update configuration starts without update prompts",
+    "Fork links, about/version and consolidated licenses visible",
+    "Extraction, unchanged reuse, corrupt cache repair, locked DLL reuse",
+    "Single EXE starts Steam NC and enters normal stage practice"
+  ]
+}

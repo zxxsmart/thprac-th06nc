@@ -12,7 +12,7 @@ inline constexpr const wchar_t* Files[] = {
     L"thprac_bridge64.exe", L"thprac_th06nc.dll", L"freetype.dll",
     L"README_NC.md", L"VALIDATION_NC.md", L"LICENCE",
     L"licenses\\FreeType-LICENSE.txt", L"licenses\\FreeType-FTL.txt",
-    L"licenses\\MinHook.txt", L"licenses\\ImGui.txt"
+    L"licenses\\MinHook.txt", L"licenses\\ImGui.txt", L"THIRD_PARTY_NOTICES.txt"
 };
 struct Resource {
     const unsigned char* data = nullptr;

@@ -9,6 +9,7 @@
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 namespace THPrac {
+namespace Gui { HWND ImplWin32GetHwnd(); }
 
 constexpr const wchar_t THPRAC_SETTINGS_JSON_NAME[] = L"settings.json";
 
@@ -374,28 +375,9 @@ void GuiSettings() {
     ImGui::TextUnformatted(S(THPRAC_UPDATE_BEHAVIOR));
     ImGui::Separator();
 
-    if (!UpdaterInitialized()) {
-        ImGui::PushStyleColor(ImGuiCol_Text, 0xFFFF0000);
-        ImGui::TextUnformatted(S(THPRAC_UPDATE_INIT_FAILED));
-        ImGui::PopStyleColor();
-    }
+    ImGui::TextWrapped("%s", S(TH06NC_MANUAL_UPDATES));
+    if (ImGui::Button(S(TH06NC_RELEASES)))OpenReleasePage(Gui::ImplWin32GetHwnd());
 
-    ImGui::PushItemWidth(ImGui::GetFontSize() * 16.0f);
-    ImGui::Combo(S(THPRAC_FILENAME_AFTER_UPDATE), (int*)&gSettings.filename_after_update, S(THPRAC_FILENAME_AFTER_UPDATE_OPTION));
-    ImGui::Combo(S(THPRAC_CHECK_UPDATE_WHEN), (int*)&gSettings.check_update, S(THPRAC_CHECK_UPDATE_WHEN_OPTION));
-    ImGui::PopItemWidth();
-    ImGui::Checkbox(S(THPRAC_UPDATE_WITHOUT_CONFIRMATION), &gSettings.update_without_confirmation);
-    ImGui::SameLine();
-    Gui::HelpMarker(S(THPRAC_UPDATE_WITHOUT_CONFIRMATION_DESC));
-    
-    if (!background_update_check || background_update_check->hThread) {
-        ImGui::BeginDisabled();
-        ImGui::Button(S(THPRAC_CHECK_UPDATE_NOW));
-        ImGui::EndDisabled();
-    } else if (ImGui::Button(S(THPRAC_CHECK_UPDATE_NOW))) {
-        background_update_check->hThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)DownloadFile, background_update_check, 0, nullptr);
-    }
-    
     ImGui::NewLine();
     ImGui::TextUnformatted(S(THPRAC_REBIND_HOTKEYS));
     ImGui::Separator();

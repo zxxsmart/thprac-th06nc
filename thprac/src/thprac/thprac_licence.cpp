@@ -1,4 +1,5 @@
 #include "thprac_licence.h"
+#include "thprac_native_bundle.h"
 #include <imgui.h>
 
 namespace THPrac {
@@ -6,6 +7,14 @@ namespace Gui {
     void ShowLicenceInfo()
     {
         if (ImGui::BeginTabBar("COPYING_TABS", ImGuiTabBarFlags_None)) {
+            auto notices = NativeBundle::Read(NativeBundle::BundleId + 11);
+            if (notices.data && ImGui::BeginTabItem("thprac-th06nc")) {
+                ImGui::BeginChild("COPYING.thprac-th06nc");
+                const char* text = reinterpret_cast<const char*>(notices.data);
+                ImGui::TextUnformatted(text, text + notices.size);
+                ImGui::EndChild();
+                ImGui::EndTabItem();
+            }
             if (ImGui::BeginTabItem("Freetype")) {
                 ImGui::BeginChild("COPYING.Freetype");
                 ImGui::TextUnformatted(COPYING_FreeType);

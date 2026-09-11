@@ -12,6 +12,7 @@ FILES = [
     'README_NC.md', 'VALIDATION_NC.md', 'LICENCE',
     'licenses/FreeType-LICENSE.txt', 'licenses/FreeType-FTL.txt',
     'licenses/MinHook.txt', 'licenses/ImGui.txt',
+    'THIRD_PARTY_NOTICES.txt',
 ]
 
 def package(launcher, payload_dir, output):

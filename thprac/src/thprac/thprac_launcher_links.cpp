@@ -1,4 +1,5 @@
 #include "thprac_launcher.h"
+#include "thprac_fork.h"
 
 #include <utility>
 
@@ -165,6 +166,17 @@ int EditLinkUI(char* linkEditTitleBuf, char* linkEditLinkBuf, bool& linkNameWarn
 
 void LauncherLinksMain(LauncherState* state) {
     auto& style = ImGui::GetStyle();
+    if (ImGui::Button(S(TH06NC_PROJECT_PAGE)))
+        ShellExecuteA(Gui::ImplWin32GetHwnd(), "open", THPRAC_FORK_REPOSITORY, nullptr, nullptr, SW_SHOW);
+    ImGui::SameLine();
+    if (ImGui::Button(S(TH06NC_RELEASES)))OpenReleasePage(Gui::ImplWin32GetHwnd());
+    ImGui::SameLine();
+    if (ImGui::Button(S(TH06NC_ISSUES)))
+        ShellExecuteA(Gui::ImplWin32GetHwnd(), "open", THPRAC_FORK_ISSUES, nullptr, nullptr, SW_SHOW);
+    ImGui::SameLine();
+    if (ImGui::Button(S(TH06NC_UPSTREAM)))
+        ShellExecuteA(Gui::ImplWin32GetHwnd(), "open", THPRAC_UPSTREAM_REPOSITORY, nullptr, nullptr, SW_SHOW);
+    ImGui::Separator();
     ImGui::BeginChild(0x21945, { 0.0f, ImGui::GetWindowHeight() - ImGui::GetCursorPosY() - ImGui::GetFontSize() - style.WindowPadding.y - style.ItemSpacing.y - style.FramePadding.y * 2 });
 
     OpenWhichPopup openWhich = OPEN_NONE;

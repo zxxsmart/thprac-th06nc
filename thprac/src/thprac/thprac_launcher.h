@@ -198,7 +198,6 @@ struct LauncherState {
     LauncherThcrapSelection thcrapSel;
 
     th_glossary_t thcrapError = A0000ERROR_C;
-    th_glossary_t updateError = A0000ERROR_C;
 
     bool inScan = false;
     bool loadRescanNeeded = false;
@@ -235,12 +234,6 @@ struct LauncherState {
     static_assert(sizeof(bool) == sizeof(unsigned char));
     std::vector<unsigned char> foundThcrapConfigsSel;
 
-    // The actual downloading of the update is still contained to the launcher because the idea for triggerring
-    // updates from an in-game popup is to close the game and run thprac with a `--update` command line flag,
-    // which triggers the PreLaunchUpdate function regardless of settings
-    HANDLE hUpdateThread = NULL;
-    DownloadParams updateDownload;
-    std::wstring updateUrl;
 };
 
 std::pair<yyjson_doc*, yyjson_val*> LoadConfigFile(const wchar_t* fn, const char* legacy_config_fallback);

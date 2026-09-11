@@ -67,7 +67,8 @@ struct THPracSettings {
     Locale language = LOCALE_EN_US;
     ExistingGameLaunchAction existing_game_launch_action = LAUNCH_ACTION_LAUNCH_GAME;
     FilenameAfterUpdate filename_after_update = FN_UPDATE_KEEP_DOWNLOADED;
-    CheckUpdateWhen check_update = CHECK_UPDATE_LAUNCHER;
+    // Retained for existing settings.json files; this fork only offers manual updates.
+    CheckUpdateWhen check_update = CHECK_UPDATE_NEVER;
     bool update_without_confirmation = false;
     bool dont_search_ongoing_game = false;
     bool thprac_admin_rights = false;   

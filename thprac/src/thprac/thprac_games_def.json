@@ -26,7 +26,15 @@
         "thpracの適用に失敗しました。"
       ],
 
-      "THPRAC_LAUNCHER": [ "thprac - 东方游戏启动器", "thprac - Touhou Game Launcher", "thprac - 東方ゲームランチャー" ],
+      "THPRAC_LAUNCHER": [ "thprac-th06nc - 东方游戏启动器", "thprac-th06nc - Touhou Game Launcher", "thprac-th06nc - 東方ゲームランチャー" ],
+      "TH06NC_UNOFFICIAL": [ "非官方分支 · zxxsmart 维护", "Unofficial fork maintained by zxxsmart", "非公式フォーク · zxxsmart がメンテナンス" ],
+      "TH06NC_UPSTREAM_VERSION": [ "基于 thprac %d.%d.%d.%d", "Based on thprac %d.%d.%d.%d", "ベース: thprac %d.%d.%d.%d" ],
+      "TH06NC_PROJECT_PAGE": [ "本分支项目主页", "Fork project page", "フォークのホームページ" ],
+      "TH06NC_RELEASES": [ "下载本分支更新", "Download fork updates", "フォークの更新をダウンロード" ],
+      "TH06NC_ISSUES": [ "反馈本分支问题", "Report a fork issue", "フォークの不具合報告" ],
+      "TH06NC_UPSTREAM": [ "原版 thprac 项目", "Upstream thprac", "元の thprac プロジェクト" ],
+      "TH06NC_MANUAL_UPDATES": [ "更新请打开本分支的 GitHub Releases，下载新版 EXE，关闭游戏和启动器后替换。", "For updates, open this fork's GitHub Releases, download the new EXE, and replace it after closing the game and launcher.", "更新はこのフォークの GitHub Releases から新しい EXE を入手し、ゲームとランチャーを終了してから置き換えてください。" ],
+      "TH06NC_OPEN_LINK_ERROR": [ "无法打开浏览器，请手动访问：", "Could not open the browser. Please visit:", "ブラウザーを開けません。次の URL にアクセスしてください：" ],
       "THPRAC_LAUNCHER_CHECKING_UPDATE": [ "thprac - 东方游戏启动器 // 检查更新中...", "thprac - Touhou Game Launcher // Checking for updates...", "thprac - 東方ゲームランチャー // 更新を確認中..." ],
 
       "THPRAC_THCRAP_NOTYET": [ "尚未设置thcrap的路径。", "thcrap location not yet specified.", "thcrapの場所はまだ指定されていません。" ],

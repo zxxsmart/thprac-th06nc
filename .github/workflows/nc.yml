@@ -1,0 +1,25 @@
+name: Build thprac-th06nc
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build Win32 launcher and x64 NC module
+        shell: powershell
+        run: .\build.ps1 -SingleFile -Python python
+      - name: Upload single executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: thprac-th06nc
+          path: |
+            build/single/thprac-th06nc.exe
+            LICENCE
+            THIRD_PARTY_NOTICES.txt
+          if-no-files-found: error
