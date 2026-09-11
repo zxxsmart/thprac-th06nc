@@ -8,7 +8,7 @@ k.OpenProcess.argtypes=[w.DWORD,w.BOOL,w.DWORD];k.OpenProcess.restype=w.HANDLE
 k.ReadProcessMemory.argtypes=[w.HANDLE,c.c_void_p,c.c_void_p,c.c_size_t,c.POINTER(c.c_size_t)]
 k.CloseHandle.argtypes=[w.HANDLE]
 class Settings(c.Structure):
-    _fields_=[(n,c.c_int32) for n in ['enabled','stage','difficulty','shot','spell','frame','lives','bombs','power','graze','point','rank']]+[('score',c.c_uint64),('flags',c.c_uint32),('restart',c.c_uint32)]+[(n,c.c_int32)for n in ['fakeShot','section','phase','dialogue','fps']]+[('saveReplay',c.c_uint32)]
+    _fields_=[(n,c.c_int32) for n in ['enabled','stage','difficulty','shot','spell','frame','lives','bombs','power','graze','point','rank']]+[('score',c.c_uint64),('flags',c.c_uint32),('restart',c.c_uint32)]+[(n,c.c_int32)for n in ['fakeShot','section','phase','dialogue','fps']]+[('reserved',c.c_uint32)]
 class Status(c.Structure):
     _fields_=[(n,c.c_int32) for n in ['ready','error','stage','difficulty','frame','lives','bombs','power','rank']]+[('starts',c.c_uint32),('score',c.c_uint64),('flags',c.c_uint32),('exports',c.c_uint32),('misses',c.c_int32),('bombsUsed',c.c_int32),('message',c.c_wchar*160)]
 class Shared(c.Structure):
@@ -16,7 +16,7 @@ class Shared(c.Structure):
 def connection(pid):
     mm=mmap.mmap(-1,c.sizeof(Shared),tagname=f'Local\\Th06NcPractice_{pid}')
     data=Shared.from_buffer(mm)
-    if data.magic!=0x4e435031 or data.version!=5:raise RuntimeError('No compatible practice connection')
+    if data.magic!=0x4e435031 or data.version!=7:raise RuntimeError('No compatible practice connection')
     return mm,data
 def inspect(pid,patch=None):
     mm,data=connection(pid)
@@ -53,7 +53,10 @@ def memory(pid):
                 'graze':read(0x4ff0cc,'<i'),'point':read(0x4f27ba,'<H'),'timer':read(0xa6ec1c,'<i'),
                 'misses':read(0x4f1e60,'<i'),'bombsUsed':read(0x4f1e64,'<i'),'fps':read(0xc22108,'<d'),
                 'replay':read(0x4f278c,'<B'),'bgmHandle':read(0x50966c,'<i'),'deathWindow':read(0x506adc,'<i'),
-                'dialogue':read(read(0xa6ec08,'<Q')-base+14000,'<i') if read(0xa6ec08,'<Q') else -1,'shot':read(0x4f1e80,'<B')*2+read(0x4f1e81,'<B')}
+                'dialogue':read(read(0xa6ec08,'<Q')-base+14000,'<i') if read(0xa6ec08,'<Q') else -1,'shot':read(0x4f1e80,'<B')*2+read(0x4f1e81,'<B'),
+                'invulnerabilityTimer':read(0x506bf8,'<i'), 'gameOver':read(0x4f27b1,'<B'),
+                'stageTitleScript':read(read(0xa6ec08,'<Q')-base+0xa58,'<Q') if read(0xa6ec08,'<Q') else 0,
+                'stageTitleVisible':read(read(0xa6ec08,'<Q')-base+0xa24,'<I')&1 if read(0xa6ec08,'<Q') else 0}
     finally:k.CloseHandle(process)
 def windows(pid):
     result=[]

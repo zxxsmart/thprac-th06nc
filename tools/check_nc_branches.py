@@ -41,7 +41,7 @@ for phase,wait in enumerate([280,40]):
 for stage,section in [(1,1),(2,7),(4,23),(5,31),(1,3)]:
     row=check(f'early-time-lock-{stage}-{section}',stage=stage,difficulty=2,section=section,flags=17)
     assert row['memory']['enemies'][0]['hp']>1,row
-row=check('infinite-resources',stage=1,difficulty=2,section=3,flags=15,lives=0,bombs=0,power=0)
-assert all(row['status']['status'][k]==v for k,v in dict(lives=8,bombs=8,power=128).items())
+row=check('locked-resources',stage=1,difficulty=2,section=3,flags=15,lives=4,bombs=2,power=64)
+assert all(row['status']['status'][k]==v for k,v in dict(lives=4,bombs=2,power=64).items())
 row=check('auto-bomb',delay=8,stage=1,difficulty=2,section=3,flags=36,lives=8,bombs=8,power=128)
 assert row['memory']['bombsUsed']>0 and row['memory']['misses']==0,row

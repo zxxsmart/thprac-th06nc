@@ -83,6 +83,10 @@ Case cases[]={
 {7,TH06_ST7_END_S8,"TH06_ST7_END_S8"},
 {7,TH06_ST7_END_S9,"TH06_ST7_END_S9"},
 {7,TH06_ST7_END_S10,"TH06_ST7_END_S10"},
+{7,FragileWing,"NC_FragileWing"},
+{7,CreepingBloodstain,"NC_CreepingBloodstain"},
+{7,DanmakuHeart,"NC_DanmakuHeart"},
+{3,10307,"NC_Stage3SecondHalf3"},
 };
 int failures=0,total=0;
 for(auto test:cases)for(int dialogue=0;dialogue<2;++dialogue)for(shot=0;shot<4;++shot) {

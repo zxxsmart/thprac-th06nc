@@ -13,6 +13,28 @@ constinit HotkeyChords hotkeys{};
 namespace THPrac::TH06NC {
 using namespace TH06;
 THPracParam thPracParam{};
+const int* ExtraSections(bool spells) {
+    static std::array<int,22> end{},cards{};
+    auto& list=spells?cards:end;
+    if(!list[0]){
+        const auto* original=spells?th_sections_cbt[6][1]:th_sections_cba[6][1];
+        size_t n=0;while(original[n]){list[n]=original[n];++n;}
+        for(int section=FragileWing;section<=DanmakuHeart;++section)list[n++]=section;
+    }
+    return list.data();
+}
+const char** ExtraSectionNames(int difficulty) {
+    static std::array<const char*,74> names{};
+    const char* added[3][3]={
+        {"咒弹「Fragile Wing」","咒弹「伏行之血痕」","「弹幕的心脏」"},
+        {"Cursed Barrage \"Fragile Wing\"","Cursed Barrage \"Creeping Bloodstain\"","\"Danmaku Heart\""},
+        {"呪弾「フラジャイルウィング」","呪弾「這い寄る血痕」","「弾幕の心臓」"}
+    };
+    auto locale=Gui::LocaleGet();
+    for(int i=0;i<FragileWing;++i)names[i]=th_sections_str[locale][difficulty][i];
+    for(int i=0;i<3;++i)names[FragileWing+i]=added[locale][i];
+    return names.data();
+}
 #include "practice_ui.inl"
 THGuiPrac& PracticeUi();
 #include "pause_ui.inl"
@@ -34,11 +56,6 @@ public:
             if(ImGui::InvisibleButton("toggle",{230,ImGui::GetTextLineHeight()}))TogglePracticeFlag(masks[i]);
             ImGui::PopID();
         }
-        ImGui::Separator();
-        if(ImGui::Button(S(TH_RESTART)))RequestPracticeRestart();
-        ImGui::SameLine();
-        const char* save[]={"保存录像","Save replay","リプレイ保存"};
-        if(ImGui::Button(save[Gui::LocaleGet()]))RequestReplaySave();
     }
 };
 class THAdvanced : public Gui::GameGuiWnd {
@@ -108,6 +125,7 @@ HRESULT STDMETHODCALLTYPE Present(IDXGISwapChain* swap, UINT interval, UINT flag
     bool anyVisible=wanted||quickWanted||advancedWanted||pauseWanted;
     if(anyVisible&&!inputHooked){Gui::ImplWin32HookWndProc();inputHooked=true;}
     if(!anyVisible) {
+        ImGui::GetIO().MouseDrawCursor=false;
         if(inputHooked){Gui::ImplWin32UnHookWndProc();inputHooked=false;}
         ImGui::SetCurrentContext(previousContext);
         return originalPresent(swap, interval, flags);
@@ -118,6 +136,9 @@ HRESULT STDMETHODCALLTYPE Present(IDXGISwapChain* swap, UINT interval, UINT flag
     uiPrevious = (prev & 0xf4) | ((prev & 0x100) ? 1 : 0);
     uiRepeat = *reinterpret_cast<uint16_t*>(imageBase + Rva::InputRepeat);
     auto& io = ImGui::GetIO();
+    // NC hides the OS cursor. Draw it in the same scaled coordinate space as
+    // the widgets, without changing the game's ShowCursor counter.
+    io.MouseDrawCursor=true;
     RECT client{};
     GetClientRect(desc.OutputWindow, &client);
     float screenScale = std::max(1.0f, float(client.bottom)) / 480.0f;
@@ -134,6 +155,7 @@ HRESULT STDMETHODCALLTYPE Present(IDXGISwapChain* swap, UINT interval, UINT flag
     ImGui::NewFrame();
     if(wanted)practice->Update();
     if(pauseWanted){
+        pause->SetPos((io.DisplaySize.x-384.0f)*0.5f,16.0f);
         pauseAction=pause->PMState();
         pause->Update();
         if(pauseAction)pauseWanted=false;

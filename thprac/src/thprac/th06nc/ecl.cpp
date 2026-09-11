@@ -21,8 +21,15 @@ int TranslateFrame(int oldTime) {
 class ECLHelper {
     struct Write { int oldOffset; std::vector<unsigned char> bytes; };
     std::vector<Write> writes;
+    struct NativeWrite { int offset,opcode,part; bool timeline; std::vector<unsigned char> bytes; };
+    std::vector<NativeWrite> nativeWrites;
     int position{};
 public:
+    template<class T> void Native(int offset,int opcode,int part,bool timeline,T value) {
+        static_assert(std::is_integral_v<T>);
+        auto data=reinterpret_cast<unsigned char*>(&value);
+        nativeWrites.push_back({offset,opcode,part,timeline,{data,data+sizeof(T)}});
+    }
     void SetPos(int p) { position=p; }
     template<class T> ECLHelper& operator<<(T value) {
         static_assert(std::is_integral_v<T>);
@@ -38,7 +45,15 @@ public:
         if(!script)return false;
         int stage=thPracParam.stage+1;
         struct Translated { unsigned char* dest; std::vector<unsigned char> bytes; };
-        std::vector<Translated> pending;
+        std::vector<Translated> pending,nativePending;
+        for(auto& write:nativeWrites){
+            auto size=scriptGuards[stage-1].size;
+            if(write.offset<0 || size_t(write.offset)+12>size || write.part<0)return false;
+            uint16_t opcode,length;memcpy(&opcode,script+write.offset+4,2);memcpy(&length,script+write.offset+6,2);
+            if(opcode!=write.opcode || length<(write.timeline?8:12) || size_t(write.offset)+length>size ||
+               size_t(write.part)+write.bytes.size()>length)return false;
+            nativePending.push_back({script+write.offset+write.part,write.bytes});
+        }
         for(auto& write:writes) {
             // NC moved this damage-enable instruction out of the final-card
             // prelude into its setup sub. There is no prelude timestamp to edit.
@@ -74,6 +89,7 @@ public:
                 memcpy(p.bytes.data(),&sub,4);
             }
         }
+        pending.insert(pending.end(),nativePending.begin(),nativePending.end());
         for(auto& p:pending)memcpy(p.dest,p.bytes.data(),p.bytes.size());
         return true;
     }
@@ -113,9 +129,17 @@ bool ApplyEcl() {
         if(hash!=guard.digest)return false;
         if(thPracParam.section>=10000) {
             int portion=thPracParam.section%100;
-            constexpr int counts[]={6,4,7,9,5,2,7};
-            if(portion<1||portion>counts[thPracParam.stage]||thPracParam.section/100!=101+thPracParam.stage)return false;
+            if(portion<1||portion>PortionCounts[thPracParam.stage]||thPracParam.section/100!=101+thPracParam.stage)return false;
             THStageWarp(ecl,thPracParam.stage+1,portion);
+        } else if(IsAddedSpell(thPracParam.section)){
+            if(thPracParam.stage!=6)return false;
+            ECLNameFix();
+            // Use the extra boss's own timeline, beyond the original final
+            // card and its unlock/dialogue branch. Preserve all later phases.
+            warpedFrame=8500;
+            constexpr int entries[]={101,106,112};
+            ecl.Native(0x12f24,0,2,true,int16_t(37)); // Spawn the normal Flandre base.
+            ecl.Native(0x3436,109,12,false,entries[thPracParam.section-FragileWing]);
         } else if(thPracParam.section)THPatch(ecl,static_cast<th_sections_t>(thPracParam.section));
         if(!ecl.Apply())return false;
         *reinterpret_cast<int*>(imageBase+Rva::TimelineFrame)=warpedFrame;

@@ -10,6 +10,9 @@ namespace {
 uintptr_t base{}; Shared* shared{}; HANDLE mutex{}, mapping{};
 Settings config{}, requested{}, initialConfig{}; Status status{};
 bool active=false, playback=false, armed=false;
+bool legacyPlayback=false;
+uint32_t resourceLocks=0;
+int lockedLives=0,lockedBombs=0,lockedPower=0;
 bool retryPending=false, speedOwned=false;
 double originalFps=60.0;
 bool initializingPractice{}, practicePaused{};
@@ -17,7 +20,7 @@ int selectedDifficulty{};
 using PlayBgm= int64_t(*)(void*,const char*); PlayBgm originalBgm{};
 void* practiceMenu{};int practiceTransitionMode{};bool confirmNativePractice{};
 using Transition=void(*)(void*,int,int); Transition originalTransition{};using MenuCallback=int64_t(*)(void*); MenuCallback originalMenu{};
- uint32_t restartSeen=0, saveSeen=0;
+uint32_t restartSeen=0;
 uint32_t simulationTick=0;
 uint32_t playbackEndTick=0;
 struct Event { uint32_t tick, flags; int enabled,rank; };
@@ -25,7 +28,7 @@ std::vector<Event> events; size_t nextEvent=0;
 bool diagnostics=false;HANDLE trace=INVALID_HANDLE_VALUE;uint32_t tracedTick=UINT32_MAX;
 struct ReplayHeader { uint32_t magic=0x4e435250, version=ReplayProtocol; Settings settings; uint64_t digest=0; uint32_t count=0,endTick=0; };
 using Callback=int64_t(*)(void*);
-Callback originalInit{}, originalUpdate{}, originalPlayer{}, originalEnemy{}, originalSupervisor{};
+Callback originalInit{}, originalUpdate{}, originalPlayer{}, originalEnemy{}, originalSupervisor{}, originalResultInit{};
 using EclCallback=int64_t(*)(void*,void*);
 EclCallback originalEcl{};
 using VoidEcl=void(*)(void*,void*); VoidEcl originalFinal{};
@@ -42,6 +45,7 @@ void sync() {
 }
 void message(const wchar_t* text) { wcsncpy_s(status.message,text,_TRUNCATE); }
 bool bossBgm(const Settings& settings) {
+    if(settings.stage==7 && IsAddedSpell(settings.section))return true;
     return settings.section>0 && settings.section<int(std::size(THPrac::TH06::th_sections_bgm)) &&
         THPrac::TH06::th_sections_bgm[settings.section];
 }
@@ -63,12 +67,13 @@ bool loadReplay() {
     std::vector<uint8_t> sidecar,raw;
     if(!readFile(std::string(name)+".thprac-nc",sidecar,16*1024*1024)||sidecar.size()<sizeof(ReplayHeader))return false;
     ReplayHeader header{};memcpy(&header,sidecar.data(),sizeof(header));
-    if(header.magic!=0x4e435250||header.version!=ReplayProtocol||!valid(header.settings)||
+    if(header.magic!=0x4e435250||(header.version!=5&&header.version!=ReplayProtocol)||!valid(header.settings)||
        header.count>(16*1024*1024)/sizeof(Event)||sidecar.size()!=sizeof(header)+size_t(header.count)*sizeof(Event))return false;
     if(!readFile(name,raw,64*1024*1024)||digest(raw.data(),raw.size())!=header.digest)return false;
     events.resize(header.count);memcpy(events.data(),sidecar.data()+sizeof(header),events.size()*sizeof(Event));
     uint32_t tick=0;for(auto& e:events){if(e.tick<tick||(e.flags&~255u)||e.rank<0||e.rank>99||(e.enabled!=0&&e.enabled!=1))return false;tick=e.tick;}
-    config=header.settings;nextEvent=0;playbackEndTick=header.endTick;return true;
+    config=header.settings;nextEvent=0;playbackEndTick=header.endTick;
+    legacyPlayback=header.version==5;return true;
 }
 void writeFile(const char* name,void* data,size_t size) {
     auto n=strlen(name);
@@ -85,21 +90,20 @@ void writeFile(const char* name,void* data,size_t size) {
     }
     originalWrite(name,data,size);
 }
-void exportReplay() {
-    auto manager=mem<void*>(Rva::ReplayManager);if(!manager||field<uint8_t>(manager,8)||!field<void*>(manager,0x70))return;
-    CreateDirectoryW(L"replay",nullptr);char name[64]{};bool reserved=false;
-    for(int slot=1;slot<=60;++slot){sprintf_s(name,"replay/th6_%02d.rpy",slot);
-      if(GetFileAttributesA((std::string(name)+".thprac-nc").c_str())!=INVALID_FILE_ATTRIBUTES)continue;
-      HANDLE file=CreateFileA(name,GENERIC_WRITE,0,nullptr,CREATE_NEW,0,nullptr);
-      if(file!=INVALID_HANDLE_VALUE){CloseHandle(file);reserved=true;break;}}
-    if(!reserved){message(L"60 个原生录像槽位已满，请先整理 replay 文件夹");return;}
-    auto input=field<uintptr_t>(manager,0);auto ended=field<uint8_t>(manager,9);
-    size_t endOffset=0x38+8*(mem<int>(Rva::Stage)-1);auto end=field<uintptr_t>(manager,endOffset);
-    auto seed=mem<uint16_t>(Rva::RandomSeed);auto randomCount=mem<uint32_t>(Rva::RandomCount);
-    using Save=void(*)(void*,const char*,const char*,char);
-    reinterpret_cast<Save>(base+Rva::SaveReplay)(manager,name,"PRACTICE",1);
-    field<uintptr_t>(manager,0)=input;field<uint8_t>(manager,9)=ended;field<uintptr_t>(manager,endOffset)=end;
-    mem<uint16_t>(Rva::RandomSeed)=seed;mem<uint32_t>(Rva::RandomCount)=randomCount;
+// TH06 routes practice exits to the native result screen's save question.
+// NC normally skips that screen in Practice mode. Initialize its assets in
+// state 9 (without adding a high score), then enter the native save flow.
+int64_t resultInit(void* p) {
+    bool practiceResult=active && !playback && mem<int>(Rva::NextState)==7;
+    if(practiceResult)field<int>(p,0x9e94)=9;
+    auto result=originalResultInit(p);
+    if(practiceResult && result==0) {
+        field<int>(p,0x9e94)=10;
+        field<int>(p,0x4450)=0;
+        memset(static_cast<char*>(p)+0x9e88,' ',8);
+        field<char>(p,0x9e90)=0;
+    }
+    return result;
 }
 void hotkeys() {
     DWORD owner=0;GetWindowThreadProcessId(GetForegroundWindow(),&owner);
@@ -145,8 +149,50 @@ void resources() {
     int extensions=0; while(extensions<5 && config.score>=mem<uint32_t>(Rva::ExtendScores+4*extensions))++extensions;
     mem<uint8_t>(Rva::Extends)=uint8_t(extensions);
 }
+void restoreResourceLocks() {
+    if(resourceLocks&InfiniteLives)mem<int8_t>(Rva::Lives)=int8_t(lockedLives);
+    if(resourceLocks&InfiniteBombs)mem<int8_t>(Rva::Bombs)=int8_t(lockedBombs);
+    if(resourceLocks&InfinitePower)mem<int16_t>(Rva::Power)=int16_t(lockedPower);
+}
+void updateResourceLocks() {
+    uint32_t next=active&&config.enabled?config.flags&(InfiniteLives|InfiniteBombs|InfinitePower):0;
+    // v5 restored maxima before GameUpdate only. Keep that exact ordering for
+    // existing replays; new recordings capture current values and restore them
+    // after the player callback as well.
+    if(legacyPlayback){
+        resourceLocks=0;
+        if(next&InfiniteLives)mem<int8_t>(Rva::Lives)=8;
+        if(next&InfiniteBombs)mem<int8_t>(Rva::Bombs)=8;
+        if(next&InfinitePower)mem<int16_t>(Rva::Power)=128;
+        return;
+    }
+    uint32_t rising=next&~resourceLocks;
+    if(rising&InfiniteLives)lockedLives=mem<int8_t>(Rva::Lives);
+    if(rising&InfiniteBombs)lockedBombs=mem<int8_t>(Rva::Bombs);
+    if(rising&InfinitePower)lockedPower=mem<int16_t>(Rva::Power);
+    resourceLocks=next;restoreResourceLocks();
+}
+void skipStageIntroduction() {
+    if(legacyPlayback || (config.section==0 && config.frame==0))return;
+    auto gui=mem<void*>(Rva::Gui);
+    if(gui){
+        // The native Spell Practice initializer hides this same stage-name VM.
+        auto title=static_cast<char*>(gui)+0x960;
+        field<uint32_t>(title,0xc4)&=~1u;
+        field<uintptr_t>(title,0xf0)=field<uintptr_t>(title,0xf8)=0;
+    }
+    auto playerObject=reinterpret_cast<void*>(base+Rva::Player);
+    // At GameInit the player is still in state 1 (birth). Its first update
+    // would enter state 3 with 240 invulnerability frames. Skip that transition.
+    field<uint8_t>(playerObject,0x7898)=0;
+    field<int>(playerObject,0x7854)=-999;
+    field<int>(playerObject,0x7858)=0;
+    field<uint32_t>(playerObject,0x798c)&=~12u;
+    field<uint32_t>(playerObject,0x79b4)=0xffffffff;
+    field<float>(playerObject,0x79ac)=field<float>(playerObject,0x79b0)=1.0f;
+}
 int64_t init(void* p) {
-    sync();playback=mem<uint8_t>(Rva::Replay)!=0;
+    sync();playback=mem<uint8_t>(Rva::Replay)!=0;legacyPlayback=false;resourceLocks=0;
     bool vanillaRetry=!playback && retryPending && !requested.enabled;
     if(playback)active=loadReplay();
     else {
@@ -156,7 +202,7 @@ int64_t init(void* p) {
         events.clear();nextEvent=0;
     }
     armed=false;retryPending=false;practicePaused=false;ClosePause();
-    initialConfig=config;simulationTick=0;restartSeen=requested.restart;saveSeen=requested.saveReplay;
+    initialConfig=config;simulationTick=0;restartSeen=requested.restart;
     if(active || vanillaRetry) {
         mem<int>(Rva::Stage)=config.stage-1;
         mem<int>(Rva::Difficulty)=config.stage==7?4:std::min(config.difficulty,3);
@@ -175,13 +221,15 @@ int64_t init(void* p) {
         if(!ApplyEcl()){active=false;status.error=7;message(L"脚本映射校验失败，未应用练习选段。");}
         if(!active){mem<int>(Rva::NextState)=8;sync();return result;}
         status.error=0;
+        skipStageIntroduction();
+        if(!legacyPlayback)updateResourceLocks();
         if(active && EclNeedsBossAssets()) {
             using LoadAnm=int64_t(*)(void*,int,const char*,int);
             auto load=reinterpret_cast<LoadAnm>(base+Rva::LoadAnm);
             if(config.stage==6)load(nullptr,11,"data/eff06.anm",0x2d3);
             if(config.stage==7){load(nullptr,11,"data/eff07.anm",0x2d3);load(nullptr,18,"data/face12c.anm",0x4c6);}
         }
-        ++status.starts;message(playback?L"已恢复练习录像参数":L"练习参数已应用");restartSeen=requested.restart;saveSeen=requested.saveReplay;
+        ++status.starts;message(playback?L"已恢复练习录像参数":L"练习参数已应用");restartSeen=requested.restart;
         if(trace!=INVALID_HANDLE_VALUE){CloseHandle(trace);trace=INVALID_HANDLE_VALUE;}
         tracedTick=UINT32_MAX;
         if(diagnostics){auto name=L"practice-trace-"+std::to_wstring(status.starts)+(playback?L"-replay.csv":L"-record.csv");
@@ -204,7 +252,7 @@ void selectParameters() {
     selected.score=thPracParam.score;selected.graze=thPracParam.graze;selected.point=thPracParam.point;
     selected.rank=thPracParam.rank;selected.flags=(requested.flags&~RankLock)|(thPracParam.rankLock?RankLock:0);
     selected.fakeShot=thPracParam.fakeType-1;selected.dialogue=thPracParam.dlg;selected.phase=thPracParam.phase;
-    selected.restart=requested.restart;selected.saveReplay=requested.saveReplay;selected.fps=requested.fps;
+    selected.restart=requested.restart;selected.fps=requested.fps;
     requested=selected;
     auto lock=WaitForSingleObject(mutex,100);if(lock==WAIT_OBJECT_0||lock==WAIT_ABANDONED){shared->settings=requested;ReleaseMutex(mutex);}
 }
@@ -222,7 +270,6 @@ int64_t update(void* p) {
         }
     }
     if(active&&!playback) {
-        if(active&&requested.saveReplay!=saveSeen){saveSeen=requested.saveReplay;exportReplay();}
         if(requested.restart!=restartSeen) {
             restartSeen=requested.restart;
             retryPending=true;
@@ -233,11 +280,9 @@ int64_t update(void* p) {
         }
     }
     if(active&&config.enabled) {
-        if(config.flags&InfiniteLives)mem<int8_t>(Rva::Lives)=8;
-        if(config.flags&InfiniteBombs)mem<int8_t>(Rva::Bombs)=8;
-        if(config.flags&InfinitePower)mem<int16_t>(Rva::Power)=128;
         if(config.flags&RankLock)mem<int>(Rva::Rank)=config.rank;
     }
+    updateResourceLocks();
     if(active && !playback && mem<int>(Rva::NextState)==2) {
         if(!practicePaused && !mem<uint8_t>(Rva::Paused) && !mem<uint8_t>(Rva::GameOver) &&
            ((mem<uint16_t>(Rva::Input)&0x400) && !(mem<uint16_t>(Rva::PreviousInput)&0x400))) {
@@ -248,7 +293,7 @@ int64_t update(void* p) {
             if(action){
                 practicePaused=false;ClosePause();
                 mem<uint16_t>(Rva::PreviousInput)|=0x400;
-                if(action==2){mem<int>(Rva::NextState)=8;return 3;}
+                if(action==2){mem<int>(Rva::NextState)=7;return 3;}
                 if(action==3){selectParameters();RequestPracticeRestart();return 3;}
             } else {
                 // Keep native render preparation, and stop the update chain just
@@ -277,7 +322,12 @@ int64_t player(void* p) {
     if(enabled&&(config.flags&AutoBomb)&&field<uint8_t>(p,0x7898)==2&&mem<int8_t>(Rva::Bombs)>0) {
         mem<uint16_t>(Rva::Input)|=2;mem<uint16_t>(Rva::PreviousInput)&=~2;
     }
-    return originalPlayer(p);
+    // Let a locked last life take the normal miss/respawn path, without letting
+    // the native zero-life branch end the practice. Restore before HUD draw.
+    if((resourceLocks&InfiniteLives)&&lockedLives==0)mem<int8_t>(Rva::Lives)=1;
+    auto result=originalPlayer(p);
+    restoreResourceLocks();
+    return result;
 }
 int64_t enemy(void* p) {
     // Timer locking is applied around the actual enemy callback, on the game thread.
@@ -385,6 +435,7 @@ DWORD WINAPI start(void*) {
       {Rva::EclUpdate,(void*)ecl,(void**)&originalEcl},{Rva::FinalSpellRage,(void*)finalPhase,(void**)&originalFinal},
       {Rva::MenuUpdate,(void*)menu,(void**)&originalMenu},{Rva::MenuTransition,(void*)transition,(void**)&originalTransition},
       {Rva::PlayBgm,(void*)playBgm,(void**)&originalBgm},
+      {Rva::ResultInit,(void*)resultInit,(void**)&originalResultInit},
       {Rva::WriteFile,(void*)writeFile,(void**)&originalWrite},{Rva::SupervisorUpdate,(void*)supervisor,(void**)&originalSupervisor}};
     for(auto& h:hooks)if(MH_CreateHook((void*)(base+h.rva),h.target,h.original)!=MH_OK){
         MH_Uninitialize();status.error=3;message(L"创建钩子失败，未应用补丁");sync();return 5;}
@@ -402,7 +453,7 @@ namespace THPrac::TH06NC {
 int MenuStage(){return mem<int>(Rva::Stage);}
 int MenuDifficulty(){return mem<int>(Rva::Difficulty);}
 int MenuShot(){return mem<uint8_t>(Rva::Character)*2+mem<uint8_t>(Rva::Shot);}
-bool PracticeActive(){return active;}
+bool PracticeActive(){return active && mem<int>(Rva::CurrentState)==2 && mem<int>(Rva::NextState)==2;}
 uint32_t PracticeFlags(){return playback?config.flags:requested.flags;}
 void ChangeRequested(void(*change)(Settings&)) {
     if(!active||playback)return;
@@ -415,7 +466,6 @@ void TogglePracticeFlag(uint32_t flag) {
     if(lock==WAIT_OBJECT_0||lock==WAIT_ABANDONED){shared->settings.flags^=flag;requested=shared->settings;ReleaseMutex(mutex);}
 }
 void RequestPracticeRestart(){ChangeRequested([](Settings& s){++s.restart;});}
-void RequestReplaySave(){ChangeRequested([](Settings& s){++s.saveReplay;});}
 int PracticeFps(){return requested.fps;}
 void SetPracticeFps(int fps) {
     if(!active||playback)return;

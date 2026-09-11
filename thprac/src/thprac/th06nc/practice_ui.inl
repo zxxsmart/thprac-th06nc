@@ -172,6 +172,7 @@
         }
         int CalcSection()
         {
+            if(*mStage==6 && (*mWarp==3||*mWarp==5))return ExtraSections(*mWarp==5)[*mSection];
             int chapterId = 0;
             switch (*mWarp) {
             case 1: // Chapter
@@ -214,6 +215,12 @@
         }
         void SectionWidget()
         {
+            if(*mStage==6 && (*mWarp==3||*mWarp==5)){
+                const auto* sections=ExtraSections(*mWarp==5);
+                if(mSection(TH_WARP_SELECT_FRAME[*mWarp],sections,ExtraSectionNames(mDiffculty)))*mPhase=0;
+                if(SectionHasDlg(sections[*mSection]))mDlg();
+                return;
+            }
             static char chapterStr[256] {};
             auto& chapterCounts = mChapterSetup[*mStage];
 

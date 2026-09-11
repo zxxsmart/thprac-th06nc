@@ -1,6 +1,7 @@
 #pragma once
 #include "practice_param.h"
 #include "addresses.h"
+#include "sections.h"
 #include <Windows.h>
 namespace THPrac::TH06NC {
 extern uintptr_t imageBase;
@@ -23,7 +24,6 @@ bool PracticeActive();
 uint32_t PracticeFlags();
 void TogglePracticeFlag(uint32_t flag);
 void RequestPracticeRestart();
-void RequestReplaySave();
 int PracticeFps();
 void SetPracticeFps(int fps);
 void ToggleQuickMenu();

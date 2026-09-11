@@ -14,7 +14,7 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('pid',type=int)
     parser.add_argument('--start',type=int,default=1)
-    parser.add_argument('--limit',type=int,default=70)
+    parser.add_argument('--limit',type=int,default=73)
     parser.add_argument('--output',type=Path,default=Path('build/nc-recipe-smoke.json'))
     parser.add_argument('--portions',action='store_true')
     args=parser.parse_args()
@@ -22,6 +22,8 @@ def main():
     header=(core/'thprac_locale_def.h').read_text(encoding='utf-8-sig').split('namespace TH06 {')[1].split('};')[0]
     ids={name:i for i,name in enumerate(re.findall(r'^\s*(A0000ERROR|TH06_\w+)\s*,',header,re.M))}
     names=re.findall(r'case THPrac::TH06::(TH06_\w+):',(core/'th06nc/practice_patches.inl').read_text())
+    for i,label in enumerate(['FRAGILE_WING','CREEPING_BLOODSTAIN','DANMAKU_HEART'],71):
+        name='TH06_ST7_NC_'+label;names.append(name);ids[name]=i
     if args.portions:
         names=[f'TH06_ST{stage}_PORTION{portion}'for stage,count in enumerate([6,4,7,9,5,2,7],1)for portion in range(1,count+1)]
         ids={name:10000+int(re.search(r'ST(\d)',name)[1])*100+int(re.search(r'PORTION(\d+)',name)[1])for name in names}
