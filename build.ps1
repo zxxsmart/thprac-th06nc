@@ -1,4 +1,4 @@
-param([switch]$PackageOnly)
+param([switch]$PackageOnly, [switch]$SingleFile, [string]$Python = 'python')
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 $build = Join-Path $root 'build'
@@ -46,3 +46,7 @@ Copy-Item -LiteralPath "$root\thprac\src\3rdParties\MinHook\LICENSE.txt" -Destin
 Copy-Item -LiteralPath "$root\thprac\src\3rdParties\ImGui\LICENSE.txt" -Destination "$licenses\ImGui.txt"
 Get-ChildItem -LiteralPath $package -File | Where-Object Name -ne 'SHA256.json' | Get-FileHash -Algorithm SHA256 | Select-Object Hash,@{n='File';e={Split-Path $_.Path -Leaf}} | ConvertTo-Json | Set-Content -Encoding UTF8 "$package\SHA256.json"
 Write-Host "Built: $package\thprac.exe"
+if ($SingleFile) {
+    & $Python "$root\tools\package_nc_single.py" --launcher "$package\thprac.exe" --payload-dir $package --output "$build\single\thprac-th06nc.exe"
+    if ($LASTEXITCODE) { throw 'Single-file packaging failed.' }
+}

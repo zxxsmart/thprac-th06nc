@@ -11,6 +11,7 @@ const wchar_t* UPDATE_JSON_URL = L"https://raw.githubusercontent.com/touhouworld
 #include "thprac_log.h"
 #include "thprac_utils.h"
 #include "thprac_update.h"
+#include "thprac_native_bundle.h"
 
 namespace THPrac {
 extern wchar_t old_working_dir[];
@@ -163,6 +164,10 @@ bool ParseUpdateJson(char* buf, size_t len, UpdateJson* out) {
 }
 
 bool CompleteUpdate(unsigned char* buf, size_t len, const wchar_t* pCmdLine, int nCmdShow, UpdateJson* updateJson) {
+    if (NativeBundle::Present()) {
+        MessageBoxW(nullptr, L"此版本包含新典支持，请使用此分支的新版本 EXE 更新。上游更新会替换掉新典模块。", L"thprac", MB_ICONINFORMATION);
+        return false;
+    }
     if (!pCmdLine) {
         pCmdLine = L"";
     }
@@ -428,6 +433,7 @@ static bool PreLaunchUpdateConfirm() {
 }
 
 bool PreLaunchUpdate(HINSTANCE hInstance, wchar_t* pCmdLine, int nCmdShow, bool update_without_confirmation) {
+    if (NativeBundle::Present()) return false;
     auto l = Gui::LocaleGet();
 
     WNDCLASS wc = { 

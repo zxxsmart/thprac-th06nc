@@ -4,7 +4,7 @@
 
 ## 使用
 
-运行本目录的 `thprac.exe`，选择「东方红魔乡新典」的 Steam 实例，勾选应用 thprac 并启动。游戏中选择 **Practice Start → 难度、机体、单面 → thprac 练习选项 → Z 确认**。
+单文件发行版只需分发并运行 `thprac-th06nc.exe`，选择「东方红魔乡新典」的 Steam 实例，勾选应用 thprac 并启动。游戏中选择 **Practice Start → 难度、机体、单面 → thprac 练习选项 → Z 确认**。
 
 选段使用正常关卡练习时间轴；选择符卡后仍保留该关卡后续阶段。Start、Extra Start、游戏自带的 Spell Practice 和无练习参数的录像使用原生流程。
 
@@ -16,13 +16,17 @@
 - 暂停选择“结束游戏”或本次练习打完后，进入游戏原生的录像保存询问。选择“是”、槽位、名字并确认后，写入 `.rpy` 和同名 `.rpy.thprac-nc` 参数文件；选择“否”不保存。两者须一起保留，并用此分支播放。录像采用 v7 参数格式，记录原生／自定义 Rank 及起始数值，不兼容此前未发布的开发版录像。
 - 练习 UI 显示鼠标指针，暂停菜单对齐新典居中的游戏版面。关卡标题和开局无敌只保留在从头开始时；跳到后续段落时不再出现。
 
-需要将 `thprac.exe`、`thprac_bridge64.exe`、`thprac_th06nc.dll`、`freetype.dll` 放在同一个目录。桥接程序负责让原有 32 位启动器加载新典所需的 64 位模块。
+单文件版内嵌桥接程序、模块、字体依赖、说明和许可证。启动新典时自动释放到 `%LOCALAPPDATA%\thprac\th06nc\<内容摘要>\`，逐项校验并恢复缺失或损坏的文件。用户不需要手动放置 DLL，程序也不将依赖释放到游戏安装目录。该目录是可重新生成的缓存；关闭游戏后可以清理。
+
+启动器仍是原有 32 位 thprac，内嵌桥接程序负责加载新典所需的 64 位模块。开发用多文件目录 `build\thprac-nc` 也保留，其中的 `thprac.exe` 仍需要同目录的桥接程序和 DLL。单文件分支不接受上游更新程序直接覆盖，请用此分支的新 EXE 更新。
 
 当前适配本地 Steam **th06nc 1.03**，EXE SHA-256：`07850c8c6e469c0e82c13423e6d0d096a88d693455bdacacbb44c0aa3bcce473`。启动时核对完整哈希；游戏更新后需要重新适配地址及脚本映射。
 
 ## 构建与源代码
 
 安装 Visual Studio 2022 C++、ClangCL、Windows SDK 和 CMake 3.24 或更新版本，在仓库根目录运行 `powershell -ExecutionPolicy Bypass -File .\build.ps1`。产物在 `build\thprac-nc`。
+
+生成单文件版本还需 Python 3.8 或更新版本（只使用标准库）：`powershell -ExecutionPolicy Bypass -File .\build.ps1 -SingleFile -Python python`，产物为 `build\single\thprac-th06nc.exe`。已构建后可添加 `-PackageOnly` 仅重新打包。`tools/package_nc_single.py` 将依赖嵌入启动器的 PE 资源，不使用额外的自解压启动器。
 
 - 现有启动器：`thprac.sln`，`ReleaseLLVM` / Win32。
 - 新典模块：根目录 `CMakeLists.txt`；实现位于 `thprac/src/thprac/th06nc`。

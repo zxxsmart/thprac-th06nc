@@ -2,7 +2,19 @@
 
 本地验证日期：2026-09-11。上游基线为 `55e6ed1336621e3099e7df1138acc360cf0500fa`，本地分支为 `feature/th06nc`。对象是 Steam th06nc 1.03，EXE SHA-256：`07850c8c6e469c0e82c13423e6d0d096a88d693455bdacacbb44c0aa3bcce473`。
 
-## Rank 修正（当前版本）
+## 单文件发行版验证
+
+`build.ps1 -SingleFile` 生成单个 `thprac-th06nc.exe`。原启动器代码负责从 PE 资源准备模块缓存；桥接程序、游戏 DLL 和 FreeType 与此前验证的多文件版逐字节一致。说明和第三方许可证也包含在资源中。原有图标、版本资源及启动器入口保留。
+
+- 检查内嵌的 10 个文件与多文件目录的原始内容逐字节一致，启动器导入表只有 Windows 系统 DLL。
+- `tools/check_nc_bundle.cpp` 使用实际缓存代码，验证首次释放、重复准备不改写文件、损坏桥接程序的恢复，以及 DLL 被只读打开时仍可复用。
+- 把唯一的 EXE 放入单独的中文目录，经原启动器启动 Steam 新典，实测游戏从 `%LOCALAPPDATA%\thprac\th06nc\<内容摘要>` 加载模块及 FreeType。
+- 实际进入 Practice Start、单面、练习设置、Boss 入口和暂停，确认模块就绪、脚本无错误、Practice=1、Spell Practice=0。
+- 原生游戏模块没有行为变更，本轮不重复全部 Rank、符卡和录像回归。测试证据为 `docs/th06nc/single-validation.json` 和 `single-practice.jpg`。
+
+单文件分发仍会在运行时创建用户缓存。上游更新器不会直接替换该单文件分支，以免丢失新典支持。
+
+## Rank 修正
 
 默认不覆盖游戏初始化的 Rank。UI 读取本机 EXE 的原生难度表（RVA `0x3084e0`），Easy／Normal／Hard／Lunatic／Extra 分别为 20／32／32／32／18，关闭“自定义 Rank”时显示禁用的数值栏。开启后允许 0–99，仅在练习初始化时写入；暂停调整在重开后生效。
 
