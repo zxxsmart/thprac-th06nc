@@ -12,11 +12,11 @@ class Settings(c.Structure):
 class Status(c.Structure):
     _fields_=[(n,c.c_int32) for n in ['ready','error','stage','difficulty','frame','lives','bombs','power','rank']]+[('starts',c.c_uint32),('score',c.c_uint64),('flags',c.c_uint32),('exports',c.c_uint32),('misses',c.c_int32),('bombsUsed',c.c_int32),('message',c.c_wchar*160)]
 class Shared(c.Structure):
-    _fields_=[('magic',c.c_uint32),('version',c.c_uint32),('settings',Settings),('status',Status)]
+    _fields_=[('magic',c.c_uint32),('version',c.c_uint32),('settings',Settings),('status',Status),('language',c.c_int32)]
 def connection(pid):
     mm=mmap.mmap(-1,c.sizeof(Shared),tagname=f'Local\\Th06NcPractice_{pid}')
     data=Shared.from_buffer(mm)
-    if data.magic!=0x4e435031 or data.version!=8:raise RuntimeError('No compatible practice connection')
+    if data.magic!=0x4e435031 or data.version!=9:raise RuntimeError('No compatible practice connection')
     return mm,data
 def inspect(pid,patch=None):
     mm,data=connection(pid)
@@ -28,6 +28,7 @@ def inspect(pid,patch=None):
         if patch:
             for key,value in patch.items():setattr(data.settings,key,value)
         result={part:{n:getattr(getattr(data,part),n)for n,_ in getattr(data,part)._fields_}for part in ['settings','status']}
+        result['language']=data.language
     finally:k.ReleaseMutex(lock);k.CloseHandle(lock)
     return result
 def memory(pid):

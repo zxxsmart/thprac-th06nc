@@ -3,6 +3,7 @@
 #include <shellapi.h>
 #include <string>
 #include "thprac_native_bundle.h"
+#include "thprac_gui_locale.h"
 namespace THPrac {
 // Cross-bitness is handled by a companion built from this same source tree.
 inline bool LaunchTH06NC(bool practice, DWORD attachPid = 0) {
@@ -22,7 +23,8 @@ inline bool LaunchTH06NC(bool practice, DWORD attachPid = 0) {
         helper += L"thprac_bridge64.exe";
     }
     std::wstring command = L"\"" + helper + L"\" " +
-        (attachPid ? L"--attach " + std::to_wstring(attachPid) : L"--steam");
+        (attachPid ? L"--attach " + std::to_wstring(attachPid) : L"--steam") +
+        L" --language " + std::to_wstring(Gui::LocaleGet());
     STARTUPINFOW startup{sizeof(startup)};
     startup.dwFlags = STARTF_USESHOWWINDOW;
     startup.wShowWindow = SW_HIDE;

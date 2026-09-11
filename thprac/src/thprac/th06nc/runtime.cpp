@@ -3,12 +3,14 @@
 #include "module.h"
 #include "thprac_locale_def.h"
 #include <cstring>
+#include <atomic>
 
 namespace THPrac::TH06NC { uintptr_t imageBase{}; }
 using namespace THPrac::TH06NC;
 namespace {
 uintptr_t base{}; Shared* shared{}; HANDLE mutex{}, mapping{};
 Settings config{}, requested{}, initialConfig{}; Status status{};
+std::atomic<int> language{1};
 bool active=false, playback=false, armed=false;
 uint32_t resourceLocks=0;
 int lockedLives=0,lockedBombs=0,lockedPower=0;
@@ -38,7 +40,10 @@ void sync() {
     if(!shared) return;
     DWORD lock=WaitForSingleObject(mutex,0);
     if(lock!=WAIT_OBJECT_0 && lock!=WAIT_ABANDONED)return;
-    if(shared->magic==Magic&&shared->version==Protocol&&valid(shared->settings))requested=shared->settings;
+    if(shared->magic==Magic&&shared->version==Protocol) {
+        if(valid(shared->settings))requested=shared->settings;
+        if(shared->language>=0&&shared->language<=2)language.store(shared->language,std::memory_order_relaxed);
+    }
 
     shared->status=status; ReleaseMutex(mutex);
 }
@@ -446,15 +451,11 @@ int NativeRank(int difficulty){return mem<int>(Rva::NativeRanks+sizeof(int)*std:
 int MenuShot(){return mem<uint8_t>(Rva::Character)*2+mem<uint8_t>(Rva::Shot);}
 bool PracticeActive(){return active && mem<int>(Rva::CurrentState)==2 && mem<int>(Rva::NextState)==2;}
 uint32_t PracticeFlags(){return playback?config.flags:requested.flags;}
+int PracticeLanguage(){return language.load(std::memory_order_relaxed);}
 void ChangeRequested(void(*change)(Settings&)) {
     if(!active||playback)return;
     auto lock=WaitForSingleObject(mutex,100);
     if(lock==WAIT_OBJECT_0||lock==WAIT_ABANDONED){change(shared->settings);requested=shared->settings;ReleaseMutex(mutex);}
-}
-void TogglePracticeFlag(uint32_t flag) {
-    if(!active||playback)return;
-    auto lock=WaitForSingleObject(mutex,100);
-    if(lock==WAIT_OBJECT_0||lock==WAIT_ABANDONED){shared->settings.flags^=flag;requested=shared->settings;ReleaseMutex(mutex);}
 }
 void RequestPracticeRestart(){ChangeRequested([](Settings& s){++s.restart;});}
 int PracticeFps(){return requested.fps;}

@@ -7,7 +7,7 @@
 #include <algorithm>
 #include "sections.h"
 
-constexpr uint32_t Magic = 0x4e435031, Protocol = 8, ReplayProtocol = 7;
+constexpr uint32_t Magic = 0x4e435031, Protocol = 9, ReplayProtocol = 7;
 constexpr wchar_t ExpectedHash[] = L"07850c8c6e469c0e82c13423e6d0d096a88d693455bdacacbb44c0aa3bcce473";
 enum Flags : uint32_t { Invincible=1, InfiniteLives=2, InfiniteBombs=4, InfinitePower=8,
     TimeLock=16, AutoBomb=32, CustomRank=64, KeepBgm=128 };
@@ -28,7 +28,9 @@ struct Status {
     int misses=0, bombsUsed=0;
     wchar_t message[160]{};
 };
-struct Shared { uint32_t magic=Magic, version=Protocol; Settings settings{}; Status status{}; };
+// UI language follows thprac's locale order: Chinese, English, Japanese.
+// Keep it outside Settings so it cannot affect practice or replay parameters.
+struct Shared { uint32_t magic=Magic, version=Protocol; Settings settings{}; Status status{}; int language=1; };
 inline std::wstring mapName(DWORD pid) { return L"Local\\Th06NcPractice_"+std::to_wstring(pid); }
 inline std::wstring mutexName(DWORD pid) { return mapName(pid)+L"_lock"; }
 inline std::wstring executablePath(HMODULE module=nullptr) {

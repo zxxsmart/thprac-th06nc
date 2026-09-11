@@ -59,7 +59,18 @@ DWORD findGame() {
 }
 int WINAPI wWinMain(HINSTANCE,HINSTANCE,LPWSTR,int) {
  int argc=0;auto argv=CommandLineToArgvW(GetCommandLineW(),&argc);DWORD pid=0;bool launch=false;
- for(int i=1;i<argc;++i) {if(std::wstring(argv[i])==L"--attach"&&i+1<argc)pid=wcstoul(argv[++i],nullptr,10);else if(std::wstring(argv[i])==L"--steam")launch=true;}
+ int language=1;
+ switch(PRIMARYLANGID(GetUserDefaultUILanguage())) {case LANG_CHINESE:language=0;break;case LANG_JAPANESE:language=2;break;}
+ for(int i=1;i<argc;++i) {
+   if(std::wstring(argv[i])==L"--attach"&&i+1<argc)pid=wcstoul(argv[++i],nullptr,10);
+   else if(std::wstring(argv[i])==L"--steam")launch=true;
+   else if(std::wstring(argv[i])==L"--language") {
+     if(i+1>=argc||wcslen(argv[i+1])!=1||argv[i+1][0]<L'0'||argv[i+1][0]>L'2') {
+       LocalFree(argv);failure(L"Invalid --language (0=Chinese, 1=English, 2=Japanese).");return 4;
+     }
+     language=argv[++i][0]-L'0';
+   }
+ }
  LocalFree(argv);
  if(launch) {
    if(!findGame() && (INT_PTR)ShellExecuteW(nullptr,L"open",L"steam://rungameid/4659620",nullptr,nullptr,SW_SHOWNORMAL)<=32) {failure(L"无法启动 Steam。");return 1;}
@@ -67,5 +78,11 @@ int WINAPI wWinMain(HINSTANCE,HINSTANCE,LPWSTR,int) {
  }
  if(!pid)pid=findGame();
  if(!pid){failure(L"未找到 th06nc 游戏进程。");return 2;}
- bool ok=attach(pid);disconnect();return ok?0:3;
+ bool ok=attach(pid);
+ if(ok) {
+   auto lock=WaitForSingleObject(mutex,1000);
+   if(lock==WAIT_OBJECT_0||lock==WAIT_ABANDONED){shared->language=language;ReleaseMutex(mutex);}
+   else {failure(L"Unable to synchronize the practice UI language.");ok=false;}
+ }
+ disconnect();return ok?0:3;
 }

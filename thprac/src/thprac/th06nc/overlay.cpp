@@ -1,4 +1,5 @@
 #include "module.h"
+#include "spell_names.h"
 #include "thprac_gui_components.h"
 #include "imgui_internal.h"
 #include "imgui_impl_dx11.h"
@@ -7,7 +8,7 @@
 #include <memory>
 
 namespace THPrac {
-constinit THPracSettings gSettings{.language = LOCALE_ZH_CN};
+constinit THPracSettings gSettings{};
 constinit HotkeyChords hotkeys{};
 }
 namespace THPrac::TH06NC {
@@ -23,16 +24,20 @@ const int* ExtraSections(bool spells) {
     }
     return list.data();
 }
-const char** ExtraSectionNames(int difficulty) {
+const char** SectionNames(int difficulty) {
     static std::array<const char*,74> names{};
-    const char* added[3][3]={
-        {"咒弹「Fragile Wing」","咒弹「伏行之血痕」","「弹幕的心脏」"},
-        {"Cursed Barrage \"Fragile Wing\"","Cursed Barrage \"Creeping Bloodstain\"","\"Danmaku Heart\""},
-        {"呪弾「フラジャイルウィング」","呪弾「這い寄る血痕」","「弾幕の心臓」"}
-    };
+    const th_glossary_t added[]={TH06NC_FRAGILE_WING,TH06NC_CREEPING_BLOODSTAIN,TH06NC_DANMAKU_HEART};
     auto locale=Gui::LocaleGet();
-    for(int i=0;i<FragileWing;++i)names[i]=th_sections_str[locale][difficulty][i];
-    for(int i=0;i<3;++i)names[FragileWing+i]=added[locale][i];
+    for(int i=0;i<FragileWing;++i) {
+        names[i]=th_sections_str[locale][difficulty][i];
+        if(locale!=LOCALE_ZH_CN) {
+            const auto* original=th_sections_str[LOCALE_JA_JP][difficulty][i];
+            for(const auto& spell:SpellNames) {
+                if(original&&strcmp(original,spell.originalJapanese)==0){names[i]=S(spell.localized);break;}
+            }
+        }
+    }
+    for(int i=0;i<3;++i)names[FragileWing+i]=S(added[i]);
     return names.data();
 }
 #include "practice_ui.inl"
@@ -43,18 +48,15 @@ public:
     THOverlay() {
         SetTitle("Mod Menu");SetFade(0.5f,0.5f);SetPos(10,10);SetSize(0,0);
         SetWndFlag(ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|
-            ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoSavedSettings|ImGuiWindowFlags_NoNav);
+            ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoSavedSettings|ImGuiWindowFlags_NoInputs|
+            ImGuiWindowFlags_NoFocusOnAppearing);
     }
     void OnContentUpdate() override {
         const th_glossary_t labels[]={TH_MUTEKI,TH_INFLIVES,TH_INFBOMBS,TH_INFPOWER,TH_TIMELOCK,TH_AUTOBOMB,TH_EL_BGM};
         const uint32_t masks[]={1,2,4,8,16,32,128};
         for(int i=0;i<7;++i) {
-            auto cursor=ImGui::GetCursorPos();
             if(PracticeFlags()&masks[i])ImGui::TextColored({0,1,0,1},"[F%d: %s]",i+1,S(labels[i]));
             else ImGui::Text("F%d: %s",i+1,S(labels[i]));
-            ImGui::SetCursorPos(cursor);ImGui::PushID(i);
-            if(ImGui::InvisibleButton("toggle",{230,ImGui::GetTextLineHeight()}))TogglePracticeFlag(masks[i]);
-            ImGui::PopID();
         }
     }
 };
@@ -99,9 +101,19 @@ HRESULT STDMETHODCALLTYPE Present(IDXGISwapChain* swap, UINT interval, UINT flag
         guiContext = ImGui::CreateContext();
         ImGui::GetIO().IniFilename = nullptr;
         ImGui::StyleColorsDark();
-        auto language = gSettings.language;
         Gui::LocaleCreateFont(16.0f);
-        Gui::LocaleSet(language);
+        // Segoe UI lacks the official English spell-name corner quotes.
+        // Reuse their Japanese glyphs from the same atlas, retaining each locale's font.
+        auto& fonts=ImGui::GetIO().Fonts->Fonts;
+        for(ImWchar c:{ImWchar(0xff62),ImWchar(0xff63)}) {
+            if(!fonts[LOCALE_EN_US]->FindGlyphNoFallback(c)) {
+                if(const auto* glyph=fonts[LOCALE_JA_JP]->FindGlyphNoFallback(c))
+                    fonts[LOCALE_EN_US]->AddGlyph(nullptr,c,glyph->X0,glyph->Y0,glyph->X1,glyph->Y1,
+                        glyph->U0,glyph->V0,glyph->U1,glyph->V1,glyph->AdvanceX);
+            }
+        }
+        fonts[LOCALE_EN_US]->BuildLookupTable();
+        Gui::LocaleSet(static_cast<Locale>(PracticeLanguage()));
         Gui::ImplWin32Init(desc.OutputWindow);
         ImGui_ImplDX11_Init(device, context);
         Gui::InGameInputInit(Gui::INGAGME_INPUT_GEN1,
@@ -113,6 +125,8 @@ HRESULT STDMETHODCALLTYPE Present(IDXGISwapChain* swap, UINT interval, UINT flag
         pause = std::make_unique<THPauseMenu>();
     }
     ImGui::SetCurrentContext(guiContext);
+    auto language=static_cast<Locale>(PracticeLanguage());
+    if(Gui::LocaleGet()!=language)Gui::LocaleSet(language);
     if (wanted && !opened) {
         practice->State(1);
         opened = true;
@@ -138,7 +152,7 @@ HRESULT STDMETHODCALLTYPE Present(IDXGISwapChain* swap, UINT interval, UINT flag
     auto& io = ImGui::GetIO();
     // NC hides the OS cursor. Draw it in the same scaled coordinate space as
     // the widgets, without changing the game's ShowCursor counter.
-    io.MouseDrawCursor=true;
+    io.MouseDrawCursor=wanted||pauseWanted||advancedWanted;
     RECT client{};
     GetClientRect(desc.OutputWindow, &client);
     float screenScale = std::max(1.0f, float(client.bottom)) / 480.0f;

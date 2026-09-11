@@ -221,7 +221,7 @@
         {
             if(*mStage==6 && (*mWarp==3||*mWarp==5)){
                 const auto* sections=ExtraSections(*mWarp==5);
-                if(mSection(TH_WARP_SELECT_FRAME[*mWarp],sections,ExtraSectionNames(mDiffculty)))*mPhase=0;
+                if(mSection(TH_WARP_SELECT_FRAME[*mWarp],sections,SectionNames(mDiffculty)))*mPhase=0;
                 if(SectionHasDlg(sections[*mSection]))mDlg();
                 return;
             }
@@ -251,7 +251,7 @@
             case 3: // Mid boss & End boss
                 if (mSection(TH_WARP_SELECT_FRAME[*mWarp],
                     th_sections_cba[*mStage + st][*mWarp - 2],
-                    th_sections_str[::THPrac::Gui::LocaleGet()][mDiffculty]))
+                    SectionNames(mDiffculty)))
                     *mPhase = 0;
                 if (SectionHasDlg(th_sections_cba[*mStage][*mWarp - 2][*mSection]))
                     mDlg();
@@ -260,7 +260,7 @@
             case 5: // Non-spell & Spellcard
                 if (mSection(TH_WARP_SELECT_FRAME[*mWarp],
                     th_sections_cbt[*mStage + st][*mWarp - 4],
-                    th_sections_str[::THPrac::Gui::LocaleGet()][mDiffculty]))
+                    SectionNames(mDiffculty)))
                     *mPhase = 0;
                 if (SectionHasDlg(th_sections_cbt[*mStage][*mWarp - 4][*mSection]))
                     mDlg();

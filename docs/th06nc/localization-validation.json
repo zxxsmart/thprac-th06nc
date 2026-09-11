@@ -1,0 +1,51 @@
+{
+  "game_version": "Steam th06nc 1.03",
+  "official_original_spell_names": 64,
+  "official_extra_spell_names": 3,
+  "original_th06_translations_unchanged": true,
+  "ipc_version": 9,
+  "replay_version": 7,
+  "titles": [
+    "TH06NC 东方红魔乡：新典　～ the Embodiment of Scarlet Devil.",
+    "TH06NC Touhou Koumakyou: New Classic - the Embodiment of Scarlet Devil",
+    "TH06NC 東方紅魔郷：New Classic　～ the Embodiment of Scarlet Devil."
+  ],
+  "sources": [
+    "Steam app 4659620 (English/Japanese store titles)",
+    "Local official localization.json: ST_ECLDATA1..7"
+  ],
+  "runtime": {
+    "single_exe_launcher_languages": [
+      1,
+      2,
+      0
+    ],
+    "english_extra_spell_menu": "passed, including official corner quote glyphs",
+    "japanese_extra_spell_menu": "passed",
+    "backspace": "English/Japanese fit in left margin, no cursor; F1 changes displayed status",
+    "pause": "Japanese/Chinese centered with cursor, including while Backspace visible",
+    "native_mode": {
+      "practice": 1,
+      "spellPractice": 0
+    },
+    "english_japanese_launcher_titles": "visible in full",
+    "isolated_launcher_config": true
+  },
+  "artifact": {
+    "file": "thprac-th06nc.exe",
+    "bytes": 5349376,
+    "sha256": "69ca8a4601b9f1f1bdb1d5978793ab9e6728d98b29f899e0cf81565703a9f4c5",
+    "embedded_files_verified": 10,
+    "bundle": "aa2f37b640706d54c1984d05a5f205f0529ed3af8bbafb8a65b57016e99cdf4a",
+    "imports": [
+      "USER32.dll",
+      "KERNEL32.dll",
+      "SHELL32.dll",
+      "COMDLG32.dll",
+      "ntdll.dll",
+      "GDI32.dll",
+      "ole32.dll",
+      "IMM32.dll"
+    ]
+  }
+}

@@ -2,6 +2,16 @@
 
 本地验证日期：2026-09-11。上游基线为 `55e6ed1336621e3099e7df1138acc360cf0500fa`，本地分支为 `feature/th06nc`。对象是 Steam th06nc 1.03，EXE SHA-256：`07850c8c6e469c0e82c13423e6d0d096a88d693455bdacacbb44c0aa3bcce473`。
 
+## 界面与英日文本修正
+
+启动器在启动及连接新典时传递当前语言；新典的共享通信升级到 v9，语言字段独立于练习参数，录像仍为 v7。修复 DLL 固定使用中文的问题。Backspace 面板移除固定 230 宽的鼠标点击区域，按文字自动收窄，只读显示 F1–F7 状态，不绘制鼠标指针；练习设置、暂停和 F12 保留指针。
+
+英日文游戏名称核对 [Steam 英文商店](https://store.steampowered.com/app/4659620/?l=english) 与 [日文商店](https://store.steampowered.com/app/4659620/?l=japanese)。67 个符卡名称（64 个原有名称、3 个新增名称）的英日文逐项对照本地游戏 `localization.json` 的 `ST_ECLDATA1..7` 条目；覆盖新典改名的 Star of Vanities、Greater Agni Shine 等。新增三张符卡的中文也逐字一致。旧版 TH06 的 glossary 与 sections 经比较没有变化。为官方英文的半角角引号复用同一字形图集中的日文字形，补足 Segoe UI 缺字。
+
+完整 ReleaseLLVM / x64 Release 构建通过。使用单文件 EXE、独立启动器配置，实际经启动器传入英语启动 Steam 游戏，再分别以日语、中文重新连接，三种语言菜单均正确。英语和日语 Extra 下拉列表显示三张新增符卡，长名称及特殊引号正常；选入最后一符后 Practice=1、Spell Practice=0、模块无错误。Backspace 英日文面板位于版面左侧空白处，没有指针，F1 状态可正常切换；同时打开暂停时保留指针并居中显示。启动器英日文完整游戏名可正常显示。
+
+证据：`docs/th06nc/localization-validation.json`、`launcher-en.jpg`、`launcher-ja.jpg`、`spells-en.jpg`、`spells-ja.jpg`、`quick-menu-en.jpg`、`quick-menu-ja.jpg`、`pause-ja.jpg`、`pause-zh.jpg`。本轮未改变练习或录像参数语义，不重复此前完整符卡、Rank 和录像回归。
+
 ## 单文件发行版验证
 
 `build.ps1 -SingleFile` 生成单个 `thprac-th06nc.exe`。原启动器代码负责从 PE 资源准备模块缓存；桥接程序、游戏 DLL 和 FreeType 与此前验证的多文件版逐字节一致。说明和第三方许可证也包含在资源中。原有图标、版本资源及启动器入口保留。
