@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README_CN.md)
 
-[zxxsmart](https://github.com/zxxsmart) がメンテナンスする [thprac](https://github.com/touhouworldcup/thprac) の**非公式フォーク**です。Steam 版『東方紅魔郷：New Classic』の練習機能を追加します。
+[thprac](https://github.com/touhouworldcup/thprac) の**非公式フォーク**です。Steam 版『東方紅魔郷：New Classic』の練習機能を追加します。
 
 **[最新版をダウンロード](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [不具合報告](https://github.com/zxxsmart/thprac-th06nc/issues)
 
@@ -38,4 +38,4 @@ powershell -ExecutionPolicy Bypass -File .\build.ps1 -SingleFile -Python python
 
 このツールは非公式のファン制作物です。ゲーム開発者・販売元、thprac 上流、TWC の公式製品・公認ビルドではありません。ゲーム本体・画像・音楽・フォントは配布物に含みません。ゲームに関する権利は上海アリス幻樂団および各権利者に帰属します。
 
-NC 対応の開発には AI 支援とローカル実行テストを使用しました。問題はこのフォークの Issues に報告してください。[検証範囲](VALIDATION_NC.md) / [変更履歴](CHANGELOG.md)。
+NC 対応の開発には AI 支援を使用しました。問題はこのフォークの Issues に報告してください。[変更履歴](CHANGELOG.md)。

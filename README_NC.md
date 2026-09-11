@@ -1,6 +1,6 @@
 # thprac-th06nc 1.0.0：红魔乡新典非官方分支
 
-由 zxxsmart 维护的[非官方 fork](https://github.com/zxxsmart/thprac-th06nc)，基于 [touhouworldcup/thprac](https://github.com/touhouworldcup/thprac) 2.3.1.1 的 `55e6ed1336621e3099e7df1138acc360cf0500fa`。新典的入口、游戏内选段菜单、暂停菜单和练习参数均接入现有 thprac；旧游戏仍使用原有模块。
+[thprac 的非官方分支](https://github.com/zxxsmart/thprac-th06nc)，基于 [touhouworldcup/thprac](https://github.com/touhouworldcup/thprac) 2.3.1.1。新典的启动入口、选段设置和暂停菜单均接入现有 thprac；其他游戏使用原有模块。
 
 ## 使用
 
@@ -39,4 +39,4 @@
 - `addresses.h` 集中列出新典的 RVA。`ecl_map.h` 保存原版与新典指令、子程序和时间轴的映射，补丁实际写入前会检查指令边界。
 - `tools/generate_nc_ecl_map.py` 使用本地解析数据生成映射；仓库及构建产物不包含游戏脚本或其他游戏资源。
 
-当前提供 73 个 Boss 选段和 40 个道中入口。Steam 启动、选面后的内嵌 UI、特殊分支、模式隔离及练习录像的测试范围与证据见 [VALIDATION_NC.md](VALIDATION_NC.md)。
+当前提供 73 个 Boss 选段和 40 个道中入口。版本变更见 [CHANGELOG.md](https://github.com/zxxsmart/thprac-th06nc/blob/main/CHANGELOG.md)。遇到问题时，请在本仓库 Issues 中附上练习器版本、游戏版本、语言、选段和复现步骤。

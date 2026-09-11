@@ -283,4 +283,11 @@ enc_temp_folder/
 /test-pid.txt
 /test-screen.png
 /audit_nc_ecl.obj
+/VALIDATION_NC.md
+/docs/th06nc/
+/tools/check_nc_*
+/tools/audit_nc_ecl.cpp
+/tools/probe_nc.py
+/tools/smoke_nc_recipes.py
+/tools/enter_nc_practice.py
 __pycache__/

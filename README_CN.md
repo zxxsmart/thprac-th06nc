@@ -2,7 +2,7 @@
 
 [English](README.md) | [日本語](README_JP.md)
 
-由 [zxxsmart](https://github.com/zxxsmart) 维护的 **[thprac](https://github.com/touhouworldcup/thprac) 非官方分支**，加入 Steam《东方红魔乡：新典》的练习支持。
+**[thprac](https://github.com/touhouworldcup/thprac) 的非官方分支**，加入 Steam《东方红魔乡：新典》的练习支持。
 
 **[下载最新版](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [反馈问题](https://github.com/zxxsmart/thprac-th06nc/issues)
 
@@ -36,7 +36,7 @@ powershell -ExecutionPolicy Bypass -File .\build.ps1 -SingleFile -Python python
 
 产物：`build/single/thprac-th06nc.exe`。构建已有适配不需要游戏解包文件。
 
-[详细说明](README_NC.md) · [测试范围](VALIDATION_NC.md) · [版本记录](CHANGELOG.md)
+[详细说明](README_NC.md) · [版本记录](CHANGELOG.md)
 
 ## 来源与许可
 
@@ -44,4 +44,4 @@ powershell -ExecutionPolicy Bypass -File .\build.ps1 -SingleFile -Python python
 
 本工具是非官方同人练习工具，不代表游戏开发商、发行商、thprac 上游或 TWC，也不宣称获得比赛使用认可。东方 Project 及游戏相关权利归上海爱丽丝幻乐团等相应权利人所有。发行文件不包含游戏 EXE、资源包、图像、音乐或字体文件。
 
-新典适配开发使用了 AI 辅助，并进行了本地运行测试。问题请提交到本分支；其他游戏模块保留上游实现，本次发行的运行验证主要针对新典。
+新典适配开发使用了 AI 辅助。问题请提交到本分支的 Issues；其他游戏模块保留上游实现。

@@ -35,7 +35,7 @@ Copy-Item -LiteralPath "$build\win32\thprac.exe" -Destination $package
 foreach ($name in 'thprac_bridge64.exe','thprac_th06nc.dll','freetype.dll') {
     Copy-Item -LiteralPath "$build\x64\bin\Release\$name" -Destination $package
 }
-foreach ($name in 'README_NC.md','VALIDATION_NC.md','LICENCE','THIRD_PARTY_NOTICES.txt') {
+foreach ($name in 'README_NC.md','LICENCE','THIRD_PARTY_NOTICES.txt') {
     Copy-Item -LiteralPath (Join-Path $root $name) -Destination $package
 }
 $licenses=Join-Path $package 'licenses'

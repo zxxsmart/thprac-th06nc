@@ -7,7 +7,7 @@ namespace Gui {
     void ShowLicenceInfo()
     {
         if (ImGui::BeginTabBar("COPYING_TABS", ImGuiTabBarFlags_None)) {
-            auto notices = NativeBundle::Read(NativeBundle::BundleId + 11);
+            auto notices = NativeBundle::Read(NativeBundle::BundleId + 10);
             if (notices.data && ImGui::BeginTabItem("thprac-th06nc")) {
                 ImGui::BeginChild("COPYING.thprac-th06nc");
                 const char* text = reinterpret_cast<const char*>(notices.data);

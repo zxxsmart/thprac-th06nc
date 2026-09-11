@@ -1,6 +1,6 @@
 thprac-th06nc v1.0.0 - Third-party notices
 
-Unofficial fork maintained by zxxsmart.
+Unofficial thprac fork with New Classic practice support.
 Upstream: https://github.com/touhouworldcup/thprac
 Original copyright and license notices remain applicable.
 Game names and spell names identify the supported game; their rights belong to

@@ -1,6 +1,6 @@
 # Contributing to thprac-th06nc
 
-This is an unofficial fork maintained by zxxsmart. Report NC issues at
+This is an unofficial thprac fork. Report NC issues at
 https://github.com/zxxsmart/thprac-th06nc/issues and include the fork version,
 game version, language, selected stage/attack and steps to reproduce.
 

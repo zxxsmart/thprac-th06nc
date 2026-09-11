@@ -27,7 +27,7 @@
       ],
 
       "THPRAC_LAUNCHER": [ "thprac-th06nc - 东方游戏启动器", "thprac-th06nc - Touhou Game Launcher", "thprac-th06nc - 東方ゲームランチャー" ],
-      "TH06NC_UNOFFICIAL": [ "非官方分支 · zxxsmart 维护", "Unofficial fork maintained by zxxsmart", "非公式フォーク · zxxsmart がメンテナンス" ],
+      "TH06NC_UNOFFICIAL": [ "非官方分支", "Unofficial fork", "非公式フォーク" ],
       "TH06NC_UPSTREAM_VERSION": [ "基于 thprac %d.%d.%d.%d", "Based on thprac %d.%d.%d.%d", "ベース: thprac %d.%d.%d.%d" ],
       "TH06NC_PROJECT_PAGE": [ "本分支项目主页", "Fork project page", "フォークのホームページ" ],
       "TH06NC_RELEASES": [ "下载本分支更新", "Download fork updates", "フォークの更新をダウンロード" ],

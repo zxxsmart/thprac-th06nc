@@ -2,7 +2,7 @@
 
 [简体中文](README_CN.md) | [日本語](README_JP.md)
 
-An **unofficial fork of [thprac](https://github.com/touhouworldcup/thprac)**, maintained by [zxxsmart](https://github.com/zxxsmart), adding practice support for the Steam edition of **Touhou Koumakyou: New Classic**.
+An **unofficial fork of [thprac](https://github.com/touhouworldcup/thprac)** with practice support for the Steam edition of **Touhou Koumakyou: New Classic**.
 
 **[Download the latest release](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [Report an issue](https://github.com/zxxsmart/thprac-th06nc/issues)
 
@@ -31,7 +31,7 @@ Game updates may require a new adapter release. You must own and install the gam
 - Chinese, English and Japanese UI follows the launcher's language. New Classic's official English/Japanese spell names are used.
 - Native replay-save confirmation after exiting or finishing practice. Keep both `.rpy` and `.rpy.thprac-nc`; NC replay metadata uses v7.
 
-The other game modules remain based on upstream thprac. This release's runtime validation focuses on New Classic; it is **not an official thprac/Touhou World Cup build**.
+Other supported games use the upstream thprac modules.
 
 ## Updates
 
@@ -49,7 +49,7 @@ powershell -ExecutionPolicy Bypass -File .\build.ps1 -SingleFile -Python python
 
 Output: `build/single/thprac-th06nc.exe`. The build includes both the Win32 launcher and x64 NC module. Extracted game files are not required to compile the adapter.
 
-[Detailed usage/build notes](README_NC.md) · [Validation scope and evidence](VALIDATION_NC.md) · [Release notes](CHANGELOG.md)
+[Detailed usage/build notes](README_NC.md) · [Release notes](CHANGELOG.md)
 
 ## Attribution and licenses
 
