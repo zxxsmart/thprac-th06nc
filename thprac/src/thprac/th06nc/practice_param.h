@@ -17,7 +17,7 @@ namespace THPrac::TH06NC {
         int32_t point;
 
         int32_t rank;
-        bool rankLock;
+        bool customRank;
         int32_t fakeType;
 
         bool dlg;
@@ -36,7 +36,7 @@ namespace THPrac::TH06NC {
             graze = 0;
             point = 0;
             rank = 0;
-            rankLock = false;
+            customRank = false;
             fakeType = 0;
             dlg = false;
             frame = 0;

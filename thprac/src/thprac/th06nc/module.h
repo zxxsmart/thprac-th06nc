@@ -9,6 +9,7 @@ extern THPracParam thPracParam;
 int MenuStage();
 int MenuDifficulty();
 int MenuShot();
+int NativeRank(int difficulty);
 bool InstallOverlay();
 void OpenPractice();
 void ClosePractice();

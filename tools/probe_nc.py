@@ -16,7 +16,7 @@ class Shared(c.Structure):
 def connection(pid):
     mm=mmap.mmap(-1,c.sizeof(Shared),tagname=f'Local\\Th06NcPractice_{pid}')
     data=Shared.from_buffer(mm)
-    if data.magic!=0x4e435031 or data.version!=7:raise RuntimeError('No compatible practice connection')
+    if data.magic!=0x4e435031 or data.version!=8:raise RuntimeError('No compatible practice connection')
     return mm,data
 def inspect(pid,patch=None):
     mm,data=connection(pid)

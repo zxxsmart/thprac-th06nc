@@ -1040,6 +1040,7 @@
       "TH06_MARISA_B": [ "魔B", "Marisa B", "恋符" ],
       "TH06_RANK": [ "Rank", "Rank", "ランク" ],
       "TH06_RANKLOCK": [ "锁Rank", "Rank Lock", "ランクを固定する" ],
+      "TH06NC_CUSTOM_RANK": [ "自定义 Rank", "Custom Rank", "ランクを指定する" ],
       "TH06_BOOKS": [ "魔法阵", "Books", "魔導書" ],
 
       "TH06_ST4_FIRE1": [ "火符「火神之光」", "Fire Sign \"Agni Shine\"", "火符「アグニシャイン」" ],

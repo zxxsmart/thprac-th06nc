@@ -7,10 +7,10 @@
 #include <algorithm>
 #include "sections.h"
 
-constexpr uint32_t Magic = 0x4e435031, Protocol = 7, ReplayProtocol = 6;
+constexpr uint32_t Magic = 0x4e435031, Protocol = 8, ReplayProtocol = 7;
 constexpr wchar_t ExpectedHash[] = L"07850c8c6e469c0e82c13423e6d0d096a88d693455bdacacbb44c0aa3bcce473";
 enum Flags : uint32_t { Invincible=1, InfiniteLives=2, InfiniteBombs=4, InfinitePower=8,
-    TimeLock=16, AutoBomb=32, RankLock=64, KeepBgm=128 };
+    TimeLock=16, AutoBomb=32, CustomRank=64, KeepBgm=128 };
 struct Settings {
     int enabled=1, stage=1, difficulty=1, shot=0, spell=-1, frame=0;
     int lives=8, bombs=8, power=128, graze=0, point=0, rank=32;
@@ -18,7 +18,7 @@ struct Settings {
     uint32_t flags=0, restart=0;
     int fakeShot=-1, section=0, phase=0, dialogue=0;
     int fps=60;
-    uint32_t reserved=0; // Retain the v5/v6 replay settings layout.
+    uint32_t reserved=0;
 };
 struct Status {
     int ready=0, error=0, stage=0, difficulty=0, frame=0, lives=0, bombs=0, power=0, rank=0;

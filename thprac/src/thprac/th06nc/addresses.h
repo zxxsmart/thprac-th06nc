@@ -16,6 +16,7 @@ inline constexpr uintptr_t SupervisorUpdate=0x79c70;
 inline constexpr uintptr_t LoadAnm=0x20b0;
 inline constexpr uintptr_t ResultInit=0x73d50;
 inline constexpr uintptr_t ExtendScores=0x3084c8;
+inline constexpr uintptr_t NativeRanks=0x3084e0;
 inline constexpr uintptr_t WaitFactor=0x30cd90;
 inline constexpr uintptr_t Misses=0x4f1e60;
 inline constexpr uintptr_t BombsUsed=0x4f1e64;

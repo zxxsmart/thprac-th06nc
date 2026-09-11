@@ -57,8 +57,8 @@
                 thPracParam.graze = *mGraze;
                 thPracParam.point = *mPoint;
 
-                thPracParam.rank = *mRank;
-                thPracParam.rankLock = *mRankLock;
+                thPracParam.rank = *mCustomRank ? *mRank : NativeRank(*mStage == 6 ? 4 : mDiffculty);
+                thPracParam.customRank = *mCustomRank;
                 if (thPracParam.section >= TH06_ST4_BOSS1 && thPracParam.section <= TH06_ST4_BOSS7)
                     thPracParam.fakeType = *mFakeShot;
                 break;
@@ -86,8 +86,8 @@
                 thPracParam.graze = *mGraze;
                 thPracParam.point = *mPoint;
 
-                thPracParam.rank = *mRank;
-                thPracParam.rankLock = *mRankLock;
+                thPracParam.rank = *mCustomRank ? *mRank : NativeRank(*mStage == 6 ? 4 : mDiffculty);
+                thPracParam.customRank = *mCustomRank;
                 if (thPracParam.section >= TH06_ST4_BOSS1 && thPracParam.section <= TH06_ST4_BOSS7)
                     thPracParam.fakeType = *mFakeShot;
                 break;
@@ -127,13 +127,17 @@
                 mPower();
                 mGraze();
                 mPoint();
-                mRank();
-                if (mRankLock()) {
-                    if (*mRankLock)
-                        mRank.SetBound(0, 99);
-                    else
-                        mRank.SetBound(0, 32);
+                if (!*mCustomRank) {
+                    *mRank = NativeRank(*mStage == 6 ? 4 : mDiffculty);
+                    ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
                 }
+                mRank();
+                if (!*mCustomRank) {
+                    ImGui::PopStyleVar();
+                    ImGui::PopItemFlag();
+                }
+                mCustomRank();
             }
 
             nav_focus();
@@ -285,14 +289,14 @@
         Gui::GuiDrag<int, ImGuiDataType_S32> mGraze { TH_GRAZE, 0, 99999, 1, 10000 };
         Gui::GuiDrag<int, ImGuiDataType_S32> mPoint { TH_POINT, 0, 9999, 1, 1000 };
 
-        Gui::GuiSlider<int, ImGuiDataType_S32> mRank { TH06_RANK, 0, 32, 1, 10, 10 };
-        Gui::GuiCheckBox mRankLock { TH06_RANKLOCK };
+        Gui::GuiSlider<int, ImGuiDataType_S32> mRank { TH06_RANK, 0, 99, 1, 10, 10 };
+        Gui::GuiCheckBox mCustomRank { TH06NC_CUSTOM_RANK };
         Gui::GuiCombo mFakeShot { TH06_FS, TH06_TYPE_SELECT };
 
         Gui::GuiNavFocus mNavFocus { TH_STAGE, TH_MODE, TH_WARP, TH_FRAME,
             TH_MID_STAGE, TH_END_STAGE, TH_NONSPELL, TH_SPELL, TH_PHASE, TH_CHAPTER,
             TH_LIFE, TH_BOMB, TH_SCORE, TH_POWER, TH_GRAZE, TH_POINT,
-            TH06_RANK, TH06_RANKLOCK, TH06_FS };
+            TH06_RANK, TH06NC_CUSTOM_RANK, TH06_FS };
 
         int mChapterSetup[7][2] {
             { 4, 2 },
