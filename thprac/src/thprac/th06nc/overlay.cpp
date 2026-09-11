@@ -52,12 +52,20 @@ public:
     }
 };
 class THAdvanced : public Gui::GameGuiWnd {
-    Gui::GuiSlider<int,ImGuiDataType_S32> fps{"FPS",30,240};
+    Gui::GuiSlider<int,ImGuiDataType_S32> fps{"##FPS",30,240};
 public:
-    THAdvanced(){SetTitle("Advanced Options");SetFade(0.8f,0.8f);SetPos(260,65);SetSize(330,115);SetItemWidth(-60);}
+    THAdvanced(){SetTitle("Advanced Options");SetFade(0.8f,0.8f);SetItemWidth(-1);}
+    void OnPreUpdate() override {
+        const auto display = ImGui::GetIO().DisplaySize;
+        // Fit inside the left margin beside the centered 384-wide pause menu.
+        const float width = std::clamp((display.x - 384.0f) * 0.5f - 20.0f, 100.0f, 220.0f);
+        SetPos(10.0f, display.y - 120.0f);
+        SetSize(width, 110.0f);
+    }
     void OnContentUpdate() override {
-        ImGui::TextUnformatted(S(TH_ADV_OPT));ImGui::Separator();
-        ImGui::TextUnformatted(S(TH_GAME_SPEED));
+        ImGui::TextWrapped("%s (F11)", S(TH_GAME_SPEED));
+        ImGui::Separator();
+        ImGui::TextUnformatted("FPS");
         *fps=PracticeFps();if(fps())SetPracticeFps(*fps);
     }
 };

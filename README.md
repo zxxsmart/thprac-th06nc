@@ -6,7 +6,7 @@ An **unofficial fork of [thprac](https://github.com/touhouworldcup/thprac)** wit
 
 **[Download the latest release](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [Report an issue](https://github.com/zxxsmart/thprac-th06nc/issues)
 
-Current fork version: **1.0.2**. Based on thprac **2.3.1.1**, upstream commit `55e6ed1336621e3099e7df1138acc360cf0500fa`.
+Current fork version: **1.0.3**. Based on thprac **2.3.1.1**, upstream commit `55e6ed1336621e3099e7df1138acc360cf0500fa`.
 
 ## Install and use
 
@@ -29,7 +29,7 @@ Game updates may require a new adapter release. You must own and install the gam
 - TH06-style stage portions and boss attacks: 73 boss selections and 40 stage portions, including the three new Extra spells.
 - Normal stage-practice flow, with later attacks continuing after the selected spell.
 - Starting resources, optional custom Rank, dialogue and supported attack phases. Rank defaults to the game's native fixed value.
-- Esc: resume, exit, retry or edit settings. Backspace: compact keyboard-only F1–F7 status panel. F12: game speed.
+- Esc: resume, exit, retry or edit settings. Backspace: compact keyboard-only F1–F7 status panel. F11: game speed.
 - Chinese, English and Japanese UI follows the launcher's language. New Classic's official English/Japanese spell names are used.
 - Native replay-save confirmation after exiting or finishing practice. Keep both `.rpy` and `.rpy.thprac-nc`; NC replay metadata uses v7.
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.3 — 2026-09-11
+
+- Move the NC frame-rate panel to the lower-left margin and fit its width beside the centered pause menu.
+- Change the NC frame-rate shortcut from F12 to F11 to avoid Steam's screenshot shortcut; show F11 on the panel and in all three language guides.
+
 ## 1.0.2 — 2026-09-11
 
 - Support attaching to an already running New Classic game through the launcher's Tools page and `--attach PID`.

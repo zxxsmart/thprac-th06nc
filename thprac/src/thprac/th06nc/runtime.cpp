@@ -117,7 +117,7 @@ void hotkeys() {
     if(pressed[VK_F7])toggle|=KeepBgm;
     bool restart=pressed['R']&&(GetAsyncKeyState(VK_ESCAPE)&0x8000);
     if(pressed[VK_BACK])ToggleQuickMenu();
-    if(pressed[VK_F12])ToggleAdvancedMenu();
+    if(pressed[VK_F11])ToggleAdvancedMenu();
     if((toggle||restart)&&!playback){auto lock=WaitForSingleObject(mutex,0);if(lock==WAIT_OBJECT_0||lock==WAIT_ABANDONED){
       shared->settings.flags^=toggle;if(restart)++shared->settings.restart;requested=shared->settings;ReleaseMutex(mutex);}}
 
