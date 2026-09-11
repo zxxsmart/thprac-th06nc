@@ -6,13 +6,15 @@
 
 **[下载最新版](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [反馈问题](https://github.com/zxxsmart/thprac-th06nc/issues)
 
-本分支版本 **1.0.1**，基于 thprac **2.3.1.1**，上游基线 `55e6ed1336621e3099e7df1138acc360cf0500fa`。
+本分支版本 **1.0.2**，基于 thprac **2.3.1.1**，上游基线 `55e6ed1336621e3099e7df1138acc360cf0500fa`。
 
 ## 使用
 
 下载 Release 中的 `thprac-th06nc.exe`，运行后选择新典的 Steam 实例、勾选应用 thprac 并启动。无需另行下载 DLL。
 
 游戏中选择 **Practice Start → 难度、机体、单面 → 练习选项 → Z 确认**。
+
+已经启动游戏时，可在启动器中选择 **工具 → 应用 thprac 至正在运行的游戏**。应用完成后回到游戏主菜单，再进入 Practice Start。
 
 当前支持 **Windows x64、Steam th06nc 1.03**，启动时核对完整 EXE 哈希。游戏更新后可能需要新的适配版本。游戏须自行购买和安装。
 

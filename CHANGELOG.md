@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2 — 2026-09-11
+
+- Support attaching to an already running New Classic game through the launcher's Tools page and `--attach PID`.
+- Recognize native 64-bit NC processes without relying on the original games' mutexes or 32-bit memory layout.
+- Wait for the bridge to finish attaching before reporting success. Reattaching reuses the loaded module and synchronizes the launcher language.
+
 ## 1.0.1 — 2026-09-11
 
 - Fix incorrect Extra spell names and out-of-bounds access in stage-four midboss, boss, nonspell and spell menus for all four shot types.

@@ -6,13 +6,15 @@ An **unofficial fork of [thprac](https://github.com/touhouworldcup/thprac)** wit
 
 **[Download the latest release](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [Report an issue](https://github.com/zxxsmart/thprac-th06nc/issues)
 
-Current fork version: **1.0.1**. Based on thprac **2.3.1.1**, upstream commit `55e6ed1336621e3099e7df1138acc360cf0500fa`.
+Current fork version: **1.0.2**. Based on thprac **2.3.1.1**, upstream commit `55e6ed1336621e3099e7df1138acc360cf0500fa`.
 
 ## Install and use
 
 1. Download `thprac-th06nc.exe` from this fork's Releases. No additional DLL downloads are needed.
 2. Run it, select the New Classic Steam instance, enable thprac, and launch.
 3. In the game, select **Practice Start → difficulty, character, stage → practice settings → Z**.
+
+If the game is already running, open **Tools → Apply thprac to a running game** in the launcher. After attaching, return to the game's main menu and enter Practice Start.
 
 Supported game: **Steam th06nc 1.03**, Windows x64. The exact executable SHA-256 is checked before injection:
 

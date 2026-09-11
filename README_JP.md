@@ -6,13 +6,15 @@
 
 **[最新版をダウンロード](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [不具合報告](https://github.com/zxxsmart/thprac-th06nc/issues)
 
-フォークのバージョン: **1.0.1**。ベース: thprac **2.3.1.1**。
+フォークのバージョン: **1.0.2**。ベース: thprac **2.3.1.1**。
 
 ## 使い方
 
 1. Releases から `thprac-th06nc.exe` をダウンロードします。DLL の別途ダウンロードは不要です。
 2. ランチャーで New Classic の Steam インスタンスを選択し、thprac を適用して起動します。
 3. ゲームで **Practice Start → 難易度・機体・ステージ → 練習設定 → Z** と進みます。
+
+ゲームがすでに起動している場合は、ランチャーのツール画面から実行中のゲームに thprac を適用できます。適用後はゲームのメインメニューに戻り、Practice Start を選択してください。
 
 対応: **Windows x64 / Steam th06nc 1.03**。ゲーム EXE のハッシュを確認します。ゲーム更新後は新しい対応版が必要になる場合があります。ゲーム本体は別途購入・インストールしてください。
 

@@ -35,7 +35,13 @@ inline bool LaunchTH06NC(bool practice, DWORD attachPid = 0) {
         return false;
     }
     CloseHandle(process.hThread);
+    bool success = true;
+    if (attachPid) {
+        DWORD exitCode = 1;
+        success = WaitForSingleObject(process.hProcess, INFINITE) == WAIT_OBJECT_0 &&
+            GetExitCodeProcess(process.hProcess, &exitCode) && exitCode == 0;
+    }
     CloseHandle(process.hProcess);
-    return true;
+    return success;
 }
 }

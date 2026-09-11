@@ -4,6 +4,7 @@
 #include "thprac_identify.h"
 #include "thprac_log.h"
 #include "thprac_gui_locale.h"
+#include "thprac_native.h"
 #include "thprac_utils.h"
 #include "utils/utils.h"
 #include "utils/wininternal.h"
@@ -190,6 +191,8 @@ bool CheckTHPracSig(HANDLE hProc, uintptr_t base) {
 
 
 const THGameVersion* CheckOngoingGameByPID(DWORD pid, uintptr_t* pOutBase, HANDLE* pOutHandle) {
+    if (pOutBase) *pOutBase = 0;
+    if (pOutHandle) *pOutHandle = nullptr;
     auto hProc = OpenProcess(
         PROCESS_QUERY_INFORMATION | PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE,
         FALSE, pid);
@@ -203,6 +206,18 @@ const THGameVersion* CheckOngoingGameByPID(DWORD pid, uintptr_t* pOutBase, HANDL
             CloseHandle(hProc);
         }
     });
+
+    BOOL launcherWow64 = FALSE, targetWow64 = FALSE;
+    if (IsWow64Process(GetCurrentProcess(), &launcherWow64) && launcherWow64 &&
+        IsWow64Process(hProc, &targetWow64) && !targetWow64) {
+        // A Win32 launcher cannot read a native x64 PEB through the legacy path.
+        // Identify the on-disk image; the x64 bridge checks its full SHA-256 again.
+        wchar_t path[32768];
+        DWORD length = DWORD(std::size(path));
+        if (!QueryFullProcessImageNameW(hProc, 0, path, &length)) return nullptr;
+        const auto* version = IdentifyExe(path, nullptr);
+        return version && version->gameId == ID_TH06NC ? version : nullptr;
+    }
 
     uintptr_t base = GetProcessModuleBase(hProc);
     if (!base) {
@@ -285,10 +300,12 @@ bool LoadSelf(HANDLE hProcess) {
 }
 
 bool ApplyToProcById(DWORD pid) {
-    uintptr_t base;
-    HANDLE hProc;
+    uintptr_t base = 0;
+    HANDLE hProc = nullptr;
     auto* sig = THPrac::CheckOngoingGameByPID(pid, &base, &hProc);
+    defer(if (hProc) CloseHandle(hProc));
     if (sig) {
+        if (sig->gameId == ID_TH06NC) return LaunchTH06NC(true, pid);
         if (!WriteTHPracSig(hProc, base) || !LoadSelf(hProc)) {
             //fprintf(stderr, "Error: failed to inject into PID %d\n", pid);
             return false;
@@ -298,9 +315,6 @@ bool ApplyToProcById(DWORD pid) {
         return false;
     }
 
-    if (hProc) {
-        CloseHandle(hProc);
-    }
     return true;
 }
 
@@ -312,17 +326,22 @@ bool FindAndAttach(bool prompt_if_no_game, bool prompt_if_yes_game, THGameID gam
         const THGameVersion* gameSig = CheckOngoingGameByPID(proc->UniqueProcessId, &base, &hProc);
         defer(if (hProc) CloseHandle(hProc));
 
-        if (!gameSig || !gameSig->initFunc || (requiredGameID != ID_UNKNOWN && gameSig->gameId != requiredGameID)) {
+        if (!gameSig || (!gameSig->initFunc && gameSig->gameId != ID_TH06NC) ||
+            (requiredGameID != ID_UNKNOWN && gameSig->gameId != requiredGameID)) {
             return false;
         }
         if (prompt_if_yes_game) {
             hasPrompted = true;
-            int choice = log_mboxf(0, MB_YESNO, S(THPRAC_PR_APPLY), S(THPRAC_PR_ASK_ATTACH), gThGameStrs[gameSig->gameId]);
+            const char* title = gameSig->gameId == ID_TH06NC ? S(TH06NC_TITLE) : gThGameStrs[gameSig->gameId];
+            int choice = log_mboxf(0, MB_YESNO, S(THPRAC_PR_APPLY), S(THPRAC_PR_ASK_ATTACH), title);
             if (choice != IDYES) {
                 return false;
             }
         }
-        if (WriteTHPracSig(hProc, base) && LoadSelf(hProc)) {
+        const bool applied = gameSig->gameId == ID_TH06NC
+            ? LaunchTH06NC(true, proc->UniqueProcessId)
+            : WriteTHPracSig(hProc, base) && LoadSelf(hProc);
+        if (applied) {
             if (prompt_if_yes_game) {
                 hasPrompted = true;
                 log_mbox(0, MB_ICONASTERISK | MB_OK, S(THPRAC_PR_COMPLETE), S(THPRAC_PR_INFO_ATTACHED));
@@ -336,7 +355,8 @@ bool FindAndAttach(bool prompt_if_no_game, bool prompt_if_yes_game, THGameID gam
         }
     };
 
-    if (CheckIfAnyGame()) {
+    // NC does not have to expose one of the original games' named mutexes.
+    if (gameID == ID_UNKNOWN || gameID == ID_TH06NC || CheckIfAnyGame()) {
         ULONG bufLen = 0;
         NtQuerySystemInformation(SystemProcessInformation, nullptr, 0, &bufLen);
         LPVOID buf = VirtualAlloc(nullptr, bufLen, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);

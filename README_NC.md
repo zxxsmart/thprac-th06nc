@@ -1,4 +1,4 @@
-# thprac-th06nc 1.0.1：红魔乡新典非官方分支
+# thprac-th06nc 1.0.2：红魔乡新典非官方分支
 
 [thprac 的非官方分支](https://github.com/zxxsmart/thprac-th06nc)，基于 [touhouworldcup/thprac](https://github.com/touhouworldcup/thprac) 2.3.1.1。新典的启动入口、选段设置和暂停菜单均接入现有 thprac；其他游戏使用原有模块。
 
@@ -7,6 +7,8 @@
 单文件发行版只需分发并运行 `thprac-th06nc.exe`，选择「东方红魔乡新典」的 Steam 实例，勾选应用 thprac 并启动。游戏中选择 **Practice Start → 难度、机体、单面 → thprac 练习选项 → Z 确认**。
 
 选段使用正常关卡练习时间轴；选择符卡后仍保留该关卡后续阶段。Start、Extra Start、游戏自带的 Spell Practice 和无练习参数的录像使用原生流程。
+
+游戏已经启动时，使用启动器中的 **工具 → 应用 thprac 至正在运行的游戏**，确认应用后回到游戏主菜单，再进入 Practice Start。也支持命令行 `thprac-th06nc.exe --attach PID`；附加时同样检查游戏版本，并通过 64 位桥接程序加载模块。
 
 - 练习菜单沿用 TH06：关卡、道中分段、道中 Boss、关底 Boss、非符、符卡、指定帧，以及残机、Bomb、分数、火力、擦弹、点数。
 - Rank 默认保持新典原生固定值：Easy 20，Normal／Hard／Lunatic 32，Extra 18。默认数值栏不可编辑；勾选“自定义 Rank”后可指定 0–99，首次开启从当前难度的原生值开始。暂停调整后重开生效，取消自定义并重开则恢复原生值。
@@ -21,7 +23,7 @@
 
 启动器仍是原有 32 位 thprac，内嵌桥接程序负责加载新典所需的 64 位模块。开发用多文件目录 `build\thprac-nc` 也保留，其中的 `thprac.exe` 仍需要同目录的桥接程序和 DLL。
 
-本分支只提供手动更新：程序中的“下载本分支更新”打开[本仓库 Releases](https://github.com/zxxsmart/thprac-th06nc/releases/latest)。下载新 EXE，关闭游戏和启动器后替换。单文件版和多文件版均不再检查、下载或安装上游更新。项目主页、反馈入口均指向本分支，上游链接另有明确标识。当前独立版本为 1.0.1；上游版本号单独显示，保留原游戏录像版本语义。
+本分支只提供手动更新：程序中的“下载本分支更新”打开[本仓库 Releases](https://github.com/zxxsmart/thprac-th06nc/releases/latest)。下载新 EXE，关闭游戏和启动器后替换。单文件版和多文件版均不再检查、下载或安装上游更新。项目主页、反馈入口均指向本分支，上游链接另有明确标识。当前独立版本为 1.0.2；上游版本号单独显示，保留原游戏录像版本语义。
 
 原项目按 MIT 许可使用；完整版权与第三方许可见 `LICENCE` 和 `THIRD_PARTY_NOTICES.txt`，单文件版内嵌并可从许可证界面查阅。本软件部分基于 FreeType 团队的工作，按 FTL 使用 FreeType。本工具不代表游戏开发商、发行商、thprac 上游或 TWC，不包含游戏程序、资源包、图像、音乐或字体文件。新典适配使用了 AI 辅助开发与本地运行测试。
 
