@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4 — 2026-09-13
+
+- Fix numeric editing after starting practice or reopening menus.
+- Allow Z to apply the current numeric edit and start practice from the initial settings menu.
+- Keep Backspace from toggling the status panel while editing numbers.
+
 ## 1.0.3 — 2026-09-11
 
 - Move the NC frame-rate panel to the lower-left margin and fit its width beside the centered pause menu.

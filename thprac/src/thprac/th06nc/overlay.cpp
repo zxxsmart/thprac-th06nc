@@ -86,6 +86,12 @@ bool quickWanted{}, advancedWanted{}, inputHooked{};
 int action{}, openingFrames{};
 uint16_t uiInput{}, uiPrevious{}, uiRepeat{};
 
+bool NumericInputActive()
+{
+    return (wanted || pauseWanted || advancedWanted) && guiContext &&
+        guiContext->ActiveId != 0 && guiContext->ActiveId == guiContext->TempInputId;
+}
+
 HRESULT STDMETHODCALLTYPE Present(IDXGISwapChain* swap, UINT interval, UINT flags)
 {
     if(!PracticeActive()){quickWanted=false;advancedWanted=false;pauseWanted=false;}
@@ -136,7 +142,17 @@ HRESULT STDMETHODCALLTYPE Present(IDXGISwapChain* swap, UINT interval, UINT flag
         opened = false;
     }
     bool anyVisible=wanted||quickWanted||advancedWanted||pauseWanted;
-    if(anyVisible&&!inputHooked){Gui::ImplWin32HookWndProc();inputHooked=true;}
+    if(anyVisible&&!inputHooked){
+        // Releases can arrive while the overlay's WndProc is detached (e.g.
+        // Enter after starting practice). Do not carry held inputs into the
+        // next menu, where a stale Enter would immediately close numeric input.
+        auto& io = ImGui::GetIO();
+        for(auto& key : io.KeysDown)key=false;
+        for(auto& button : io.MouseDown)button=false;
+        io.ClearInputCharacters();
+        ImGui::ClearActiveID();
+        inputHooked=Gui::ImplWin32HookWndProc();
+    }
     if(!anyVisible) {
         ImGui::GetIO().MouseDrawCursor=false;
         if(inputHooked){Gui::ImplWin32UnHookWndProc();inputHooked=false;}
@@ -175,12 +191,15 @@ HRESULT STDMETHODCALLTYPE Present(IDXGISwapChain* swap, UINT interval, UINT flag
     }
     if(quickWanted){overlay->Open();overlay->Update();}else overlay->Close();
     if(advancedWanted){advanced->Open();advanced->Update();}else advanced->Close();
-    if (wanted && ++openingFrames > 12 && !ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel) && !ImGui::IsAnyItemActive()) {
-        if ((native & 0x100) && !(prev & 0x100)) {
+    if (wanted && ++openingFrames > 12 && !ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel)) {
+        if ((native & 0x100) && !(prev & 0x100) && (!ImGui::IsAnyItemActive() || NumericInputActive())) {
+            // Numeric widgets have already applied this frame's edits. Z also
+            // confirms them and starts practice without an extra focus change.
+            ImGui::ClearActiveID();
             practice->State(3);
             action = 1;
             wanted = false;
-        } else if ((native & 0x200) && !(prev & 0x200)) {
+        } else if ((native & 0x200) && !(prev & 0x200) && !ImGui::IsAnyItemActive()) {
             action = 2;
             wanted = false;
         }
@@ -226,7 +245,7 @@ void OpenPractice() { wanted = true; action = 0; }
 void ClosePractice() { wanted = false; }
 bool PracticeIsOpen() { return wanted || opened; }
 int TakePracticeAction() { int result = action; action = 0; return result; }
-void ToggleQuickMenu(){if(PracticeActive())quickWanted=!quickWanted;}
+void ToggleQuickMenu(){if(PracticeActive()&&!NumericInputActive())quickWanted=!quickWanted;}
 void ToggleAdvancedMenu(){if(PracticeActive())advancedWanted=!advancedWanted;}
 bool InstallOverlay()
 {

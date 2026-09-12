@@ -6,7 +6,7 @@
 
 **[下载最新版](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [反馈问题](https://github.com/zxxsmart/thprac-th06nc/issues)
 
-本分支版本 **1.0.3**，基于 thprac **2.3.1.1**，上游基线 `55e6ed1336621e3099e7df1138acc360cf0500fa`。
+本分支版本 **1.0.4**，基于 thprac **2.3.1.1**，上游基线 `55e6ed1336621e3099e7df1138acc360cf0500fa`。
 
 ## 使用
 
@@ -21,6 +21,7 @@
 - 正常关卡练习流程；73 个 Boss 选段、40 个道中入口，包含三张新增 Extra 符卡。
 - 初始资源可调，Rank 默认保持新典原生值，也可手动开启自定义 Rank。
 - Esc 暂停；Backspace 显示紧凑的 F1–F7 状态面板，不显示鼠标指针；F11 调整速度。
+- 开始前编辑数字时，按 Z 提交数值并进入练习；编辑数字期间，Backspace 只删除文字。
 - 练习 UI 跟随启动器中英日语言，英日符卡名称使用新典官方文本。
 - 退出或完成练习后使用游戏原生录像保存确认。`.rpy` 和同名 `.rpy.thprac-nc` 须一起保留；参数格式为 v7。
 

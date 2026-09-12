@@ -6,7 +6,7 @@ An **unofficial fork of [thprac](https://github.com/touhouworldcup/thprac)** wit
 
 **[Download the latest release](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [Report an issue](https://github.com/zxxsmart/thprac-th06nc/issues)
 
-Current fork version: **1.0.3**. Based on thprac **2.3.1.1**, upstream commit `55e6ed1336621e3099e7df1138acc360cf0500fa`.
+Current fork version: **1.0.4**. Based on thprac **2.3.1.1**, upstream commit `55e6ed1336621e3099e7df1138acc360cf0500fa`.
 
 ## Install and use
 
@@ -30,6 +30,7 @@ Game updates may require a new adapter release. You must own and install the gam
 - Normal stage-practice flow, with later attacks continuing after the selected spell.
 - Starting resources, optional custom Rank, dialogue and supported attack phases. Rank defaults to the game's native fixed value.
 - Esc: resume, exit, retry or edit settings. Backspace: compact keyboard-only F1–F7 status panel. F11: game speed.
+- While editing numbers, Z applies the value and starts practice from the initial settings menu; Backspace only deletes text.
 - Chinese, English and Japanese UI follows the launcher's language. New Classic's official English/Japanese spell names are used.
 - Native replay-save confirmation after exiting or finishing practice. Keep both `.rpy` and `.rpy.thprac-nc`; NC replay metadata uses v7.
 
@@ -59,4 +60,4 @@ Original thprac: Copyright (c) 2022 Ack and thprac contributors, [MIT License](L
 
 Touhou Project and the supported game belong to Team Shanghai Alice and their respective rights holders. This is an unofficial fan-made practice tool, not endorsed by the game developers, publisher, thprac maintainers or TWC. No game executable, archive, graphics, music or font files are distributed with the tool.
 
-The NC adapter was developed with AI assistance and local runtime testing. This fork has its own issue tracker and releases; upstream contribution policies remain documented in [the upstream contribution guide](docs/upstream/CONTRIBUTING.md).
+The NC adapter was developed with AI assistance. This fork has its own issue tracker and releases; upstream contribution policies remain documented in [the upstream contribution guide](docs/upstream/CONTRIBUTING.md).
