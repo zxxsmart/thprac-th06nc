@@ -1,57 +1,45 @@
-# 新典低延迟模式
+# 低延迟模式 / Low-latency mode / 低遅延モード
 
-这是针对 Steam th06nc 1.03 的可选显示补丁，默认关闭，仍属实验性功能。目标是减少画面提交后的等待；它不提高游戏逻辑频率，也不保证所有电脑都能获得相同收益。
+[简体中文](#zh) · [English](#en) · [日本語](#ja)
 
-## 使用与关闭
+<a id="zh"></a>
 
-1. 退出正在运行的新典，在启动器的新典详情页勾选“以低延迟模式启动（实验性）”。此选项与“应用 thprac”独立，可用于普通游戏和练习。
-2. 游戏画面设置使用 **Borderless（推荐）** 或 **Window**，在 Windows 中选择显示器支持的高刷新率。显卡驱动若强制垂直同步，可能改变实际提交行为；本功能不修改驱动设置。
-3. 要关闭，退出游戏、取消勾选后重新启动。工具页的“应用 thprac 至正在运行的游戏”不负责切换低延迟启动选项。
+## 简体中文
 
-首次升级后点击新典会先显示启动配置；之后可自行设置默认启动。已经设为默认启动时，右键游戏条目可进入详细设置。
+新典的可选显示优化，默认关闭，可独立于练习功能使用。
 
-## 机制
+**使用：**退出游戏，在启动器的新典详情页勾选“以低延迟模式启动（实验性）”，再启动游戏。画面设置推荐 **Borderless**，也支持 **Window**；高刷显示器请在 Windows 中设置所需刷新率。取消勾选并重启游戏即可关闭。已设为默认启动时，可右键游戏条目进入详细设置。
 
-新典使用 D3D11。原生显示链采用 `DXGI_SWAP_EFFECT_DISCARD` 拷贝式交换链；即使显卡设置关闭垂直同步，窗口显示仍可能经过桌面合成，因而不能仅凭驱动开关判断整条显示链是否低延迟。
+**机制：**将原生 D3D11 拷贝式交换链换成双缓冲 **Flip Discard**，以 `Present(0)` 允许撕裂的方式提交画面。在输入采样前等待显示队列可用，并将最大帧延迟设为 1。满足条件时可使用 Independent Flip，减少桌面合成与显示等待。实现同时处理渲染目标重新绑定和窗口尺寸变化。
 
-本模式将符合条件的交换链替换为双缓冲 `DXGI_SWAP_EFFECT_FLIP_DISCARD`，创建时设置 `ALLOW_TEARING` 与 `FRAME_LATENCY_WAITABLE_OBJECT`，提交时使用 `Present(0, DXGI_PRESENT_ALLOW_TEARING)`。满足系统、窗口和硬件条件时，Windows 可以采用 Independent Flip，减少合成等待；启用本功能并不等于始终处于 Independent Flip。[微软：DXGI Flip Model](https://devblogs.microsoft.com/directx/dxgi-flip-model/)
+**高刷：**新典 1.03 的独占 **Full Screen** 会请求 60 Hz，因此推荐无边框模式沿用桌面高刷新率。游戏逻辑仍默认 60 FPS，操作判定、游戏速度和录像格式保持原样。VRR 是否生效取决于显示器与驱动设置，本功能不自动开启 G-SYNC／FreeSync。
 
-新交换链设置 `SetMaximumFrameLatency(1)`。在游戏更新链开始、原生输入采样之前等待交换链队列可用；每次提交画面后最多等待一次，避免录像快进的多次逻辑更新重复等待。等待可被窗口消息唤醒，并有超时限制，失焦或最小化时跳过。原生的帧率计时与等待机制继续工作。[微软：可等待交换链](https://learn.microsoft.com/en-us/windows/uwp/gaming/reduce-latency-with-dxgi-1-3-swap-chains)
+**注意：**画面可能出现撕裂，实际改善取决于显示环境；叠加层或录屏工具也可能影响效果。不支持的配置使用原生显示方式；如遇显示异常，关闭选项并重启游戏即可。
 
-原生交换链本身也将最大帧延迟设为 1，因此不能把收益解释成“从默认三帧缩短到一帧”。主要变化是显示提交路径，以及队列等待相对于输入采样的位置。
+<a id="en"></a>
 
-## 实现边界
+## English
 
-启动器把低延迟选项通过独立的启动参数映射传给 64 位模块，模块在安装钩子前读取。只有启用此选项时才安装显示更新与缩放钩子；未勾选“应用 thprac”时，不安装练习逻辑钩子。
+An optional display optimization for New Classic, off by default and independent of practice features.
 
-显示模块先检查原生交换链的窗口模式、采样数、颜色格式、呈现路径，以及 DXGI 的允许撕裂能力。替代交换链、后台缓冲区、资源视图和等待句柄全部准备成功后，才切换游戏持有的资源。
+**Use:** Close the game, enable “Launch with low latency (experimental)” in the launcher's New Classic details page, then launch again. **Borderless** is recommended; **Window** is also supported. Select your preferred high refresh rate in Windows. To disable the feature, uncheck it and restart the game. If direct launch is enabled, right-click the game entry to open its settings.
 
-切换过程沿用游戏自己的缓存感知渲染目标设置函数和后台缓冲区释放流程，避免直接清空 D3D11 状态导致引擎缓存失配。Flip 提交后重新绑定渲染目标；`ResizeBuffers` 保留创建时必须维持的标志。游戏重建交换链时重新判断能否应用。
+**How it works:** The native D3D11 copy-based swap chain is replaced with a double-buffered **Flip Discard** chain using `Present(0)` with tearing allowed. The game waits for the display queue before sampling input, with maximum frame latency set to 1. Where supported, Independent Flip reduces desktop composition and display waiting. The implementation also handles render-target rebinding and window resizing.
 
-| 代码 | 职责 |
-| --- | --- |
-| [presentation.cpp](thprac/src/thprac/th06nc/presentation.cpp) | 交换链替换、队列等待、提交和缩放处理 |
-| [runtime.cpp](thprac/src/thprac/th06nc/runtime.cpp) | 在原生更新链前接入显示处理，独立控制练习钩子 |
-| [overlay.cpp](thprac/src/thprac/th06nc/overlay.cpp) | 接入实际 D3D11 提交入口、绘制界面与回退提示 |
-| [bridge.cpp](thprac/src/thprac/th06nc/bridge.cpp) | 启动配置传递、版本检查与初始化状态处理 |
-| [addresses.h](thprac/src/thprac/th06nc/addresses.h) | th06nc 1.03 的原生函数与数据地址 |
+**High refresh rates:** New Classic 1.03 requests 60 Hz in exclusive **Full Screen**, so Borderless is recommended to retain the desktop refresh rate. Game logic remains at 60 FPS by default; input rules, game speed and replay format are unchanged. VRR depends on the display and driver settings; this feature does not automatically enable G-SYNC or FreeSync.
 
-只修改本次进程内的显示路径，不改写游戏 EXE、系统显示设置或驱动配置。游戏 EXE 的完整 SHA-256 必须匹配适配版本；游戏更新后需重新适配。
+**Notes:** Tearing may occur, and the improvement depends on the display setup. Overlays or recording tools may also affect the result. Unsupported configurations use the native display path. If display problems occur, disable the option and restart the game.
 
-## 高刷新率与 VRR
+<a id="ja"></a>
 
-新典 1.03 的独占 **Full Screen** 切换代码会请求 **60 Hz**。本功能不改写这一流程，并对该模式使用原生显示路径。因此高刷显示器优先使用 **Borderless**，让游戏沿用桌面刷新率。
+## 日本語
 
-例如 180 Hz 的刷新周期约为 5.56 ms，60 Hz 约为 16.67 ms；更高刷新率可缩短等待后续刷新和扫描的时间，但实际可见延迟还取决于显示路径、屏幕位置和面板响应。游戏仍默认每秒更新 60 次，不会变成每秒采样输入 180 次，也没有插帧或重复渲染功能。F11 的游戏速度设置仍是独立功能，不应把提高游戏速度当作低延迟设置。
+新典向けの任意の表示最適化です。初期設定はオフで、練習機能とは独立して使用できます。
 
-允许撕裂的 Flip 交换链提供了使用 VRR 所需的应用侧条件，但不代表 G-SYNC／FreeSync 已开启。是否实际使用 VRR，仍取决于显示器、驱动、窗口模式和刷新范围；本功能不强制 VRR，也不提供额外的 VRR 或低帧率补偿策略。[微软：可变刷新率显示器](https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/variable-refresh-rate-displays)
+**使い方：**ゲームを終了し、ランチャーの新典の詳細設定で「低遅延モードで起動（試験的機能）」を有効にして起動します。画面設定は **Borderless** を推奨し、**Window** にも対応します。高リフレッシュレートは Windows 側で設定してください。無効にするにはチェックを外してゲームを再起動します。直接起動が設定されている場合は、ゲームの項目を右クリックして詳細設定を開けます。
 
-## 风险与副作用
+**仕組み：**元の D3D11 のコピー方式のスワップチェーンを、ダブルバッファーの **Flip Discard** に置き換え、ティアリングを許可した `Present(0)` で画面を提示します。入力取得前に表示キューの空きを待ち、最大フレーム遅延を 1 に設定します。条件が整えば Independent Flip が利用され、デスクトップ合成と表示の待ち時間を減らせます。描画先の再バインドやウィンドウサイズ変更にも対応しています。
 
-- **画面可能撕裂。** 同步间隔为 0 并允许撕裂，优先减少等待，不承诺无撕裂显示。
-- **收益与稳定性受显示环境影响。** 窗口遮挡、叠加层、录屏工具、多显示器和混合显卡可能改变合成路径；启用后也可能没有明显改善。若出现闪烁、黑屏、捕获异常或卡顿，关闭选项并重新启动游戏。
-- **回退有边界。** 不支持的配置或替换准备失败时保留原生显示路径并提示；这并不能保证捕获所有驱动错误、设备丢失或其他注入工具冲突。进程内显示补丁仍存在崩溃和丢失未保存练习进度的风险。
-- **独占全屏不获此项优化。** 切到该模式时回到原生路径，且可能因游戏请求 60 Hz 而降低显示刷新率。切回支持的窗口模式后会重新尝试应用。
-- **不是完整的输入延迟补丁。** 不改键盘／手柄轮询、原生逻辑顺序、默认 60 FPS、操作判定、弹幕速度和录像参数格式。设备自身延迟、系统调度、渲染耗时及面板响应仍然存在。
+**高リフレッシュレート：**新典 1.03 は排他的な **Full Screen** で 60 Hz を要求するため、デスクトップのリフレッシュレートを維持するには Borderless を推奨します。ゲームロジックは標準で 60 FPS のままで、操作判定・ゲーム速度・リプレイ形式は変わりません。VRR の動作はディスプレイとドライバーの設定に依存し、本機能が G-SYNC／FreeSync を自動で有効にすることはありません。
 
-低延迟配置独立于练习与录像参数，NC 录像元数据继续使用 v7。录像重现游戏输入与逻辑，不重现录制机器的屏幕扫描时序。本功能不承诺固定减少若干毫秒，也不把画面提交到显示的时间等同于完整的按键到屏幕延迟。
+**注意：**ティアリングが発生する場合があり、効果は表示環境によって異なります。オーバーレイや録画ツールも影響することがあります。非対応の設定では元の表示方式を使用します。表示に問題がある場合は、設定を無効にしてゲームを再起動してください。

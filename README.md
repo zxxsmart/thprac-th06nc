@@ -18,7 +18,7 @@ If the game is already running, open **Tools → Apply thprac to a running game*
 
 **Experimental low-latency display:** enable **Launch with low latency** before starting New Classic. This option is off by default and works independently of practice features. Use **Borderless** (recommended) or **Window**, with your preferred high refresh rate selected in Windows. It reduces display waiting and may cause tearing; game speed and replay rules are unchanged. Unsupported display modes, including exclusive Full Screen, use the original display path. Restart the game after changing the launcher option.
 
-Implementation, high-refresh behavior and risks: [Low-latency mode (Chinese)](LOW_LATENCY.md).
+Implementation, high-refresh behavior and risks: [Low-latency mode](LOW_LATENCY.md#en).
 
 Supported game: **Steam th06nc 1.03**, Windows x64. The exact executable SHA-256 is checked before injection:
 

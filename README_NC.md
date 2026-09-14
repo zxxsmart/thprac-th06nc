@@ -8,7 +8,7 @@
 
 启动前可独立勾选 **“以低延迟模式启动（实验性）”**，默认关闭，下一次启动游戏时生效。建议游戏画面设置使用 **Borderless**，也支持 **Window**；高刷显示器沿用 Windows 的桌面刷新率。此模式使用 Flip Model 和允许撕裂的画面提交，保留 60 FPS 游戏逻辑及原有录像格式。不支持的显示配置（包括独占 Full Screen）会回退到普通显示并提示。该选项不修改显卡驱动设置，不需要另行安装 vpatch。
 
-机制、实现、高刷行为及风险见独立的[低延迟模式说明](https://github.com/zxxsmart/thprac-th06nc/blob/v1.1.0/LOW_LATENCY.md)。
+机制、实现、高刷行为及风险见独立的[低延迟模式说明](https://github.com/zxxsmart/thprac-th06nc/blob/main/LOW_LATENCY.md#zh)。
 
 选段使用正常关卡练习时间轴；选择符卡后仍保留该关卡后续阶段。Start、Extra Start、游戏自带的 Spell Practice 和无练习参数的录像使用原生流程。
 
