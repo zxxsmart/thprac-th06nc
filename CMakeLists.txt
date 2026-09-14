@@ -10,7 +10,7 @@ set(core "${CMAKE_CURRENT_SOURCE_DIR}/thprac/src/thprac")
 set(vendor "${CMAKE_CURRENT_SOURCE_DIR}/thprac/src/3rdParties")
 add_subdirectory("${vendor}/MinHook")
 add_library(thprac_th06nc SHARED
-  ${core}/th06nc/runtime.cpp ${core}/th06nc/overlay.cpp ${core}/th06nc/ecl.cpp
+  ${core}/th06nc/runtime.cpp ${core}/th06nc/overlay.cpp ${core}/th06nc/ecl.cpp ${core}/th06nc/presentation.cpp
   ${core}/thprac_gui_components.cpp ${core}/thprac_gui_input.cpp
   ${core}/thprac_gui_locale.cpp ${core}/thprac_gui_impl_win32.cpp
   ${core}/thprac_locale_def.cpp

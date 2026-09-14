@@ -35,6 +35,7 @@
       "TH06NC_UPSTREAM": [ "原版 thprac 项目", "Upstream thprac", "元の thprac プロジェクト" ],
       "TH06NC_MANUAL_UPDATES": [ "更新请打开本分支的 GitHub Releases，下载新版 EXE，关闭游戏和启动器后替换。", "For updates, open this fork's GitHub Releases, download the new EXE, and replace it after closing the game and launcher.", "更新はこのフォークの GitHub Releases から新しい EXE を入手し、ゲームとランチャーを終了してから置き換えてください。" ],
       "TH06NC_OPEN_LINK_ERROR": [ "无法打开浏览器，请手动访问：", "Could not open the browser. Please visit:", "ブラウザーを開けません。次の URL にアクセスしてください：" ],
+      "TH06NC_INSTALL_DIRECTORY_ERROR": [ "未找到 Steam 登记的新典安装目录。请确认游戏已安装。", "Could not find New Classic's installation directory registered by Steam. Please make sure the game is installed.", "Steamに登録された新典のインストール先が見つかりません。ゲームがインストールされているか確認してください。" ],
       "THPRAC_LAUNCHER_CHECKING_UPDATE": [ "thprac - 东方游戏启动器 // 检查更新中...", "thprac - Touhou Game Launcher // Checking for updates...", "thprac - 東方ゲームランチャー // 更新を確認中..." ],
 
       "THPRAC_THCRAP_NOTYET": [ "尚未设置thcrap的路径。", "thcrap location not yet specified.", "thcrapの場所はまだ指定されていません。" ],
@@ -230,6 +231,17 @@
       "THPRAC_GAMES_OPEN_APPDATA": [ "打开游戏数据文件夹", "Open game data folder", "ゲームデータフォルダを開く" ],
       "THPRAC_GAMES_LAUNCH_CUSTOM": [ "启动custom.exe", "Launch custom.exe", "custom.exeを起動します" ],
       "THPRAC_GAMES_USE_VPATCH": [ "使用VsyncPatch（如果可用）", "Use VsyncPatch (if avaliable)", "VsyncPatch を使用する (利用可能な場合)" ],
+      "THPRAC_GAMES_LOW_LATENCY": [ "以低延迟模式启动（实验性）", "Launch with low latency (experimental)", "低遅延モードで起動（試験的機能）" ],
+      "THPRAC_GAMES_LOW_LATENCY_UNAVAILABLE": [
+        "低延迟显示已停用，当前使用普通显示。请在画面设置中选择 Borderless 或 Window。",
+        "Low-latency display is inactive; using the original display path. Select Borderless or Window in the game's graphics settings.",
+        "低遅延表示は無効になり、通常の表示方式を使用しています。ゲームの画面設定で Borderless または Window を選択してください。"
+      ],
+      "THPRAC_GAMES_LOW_LATENCY_DESC": [
+        "仅在下次启动新典时生效，可与练习功能独立使用。减少显示等待，可能出现画面撕裂；不改变游戏速度。建议使用窗口或无边框模式，并在 Windows 中选择显示器的最高刷新率。",
+        "Applies on the next game launch, independently of practice features. Reduces display waiting; tearing may occur. Game speed is unchanged. Use windowed or borderless mode and your monitor's highest refresh rate in Windows.",
+        "次回のゲーム起動時に適用され、練習機能とは独立して使用できます。表示待ちを減らしますが、ティアリングが発生する場合があります。ゲーム速度は変わりません。ウィンドウまたはボーダーレス表示を使用し、Windowsでモニターの最高リフレッシュレートを選択してください。"
+      ],
       "THPRAC_GAMES_USE_OILP": [ "使用OpenInputLagPatch（如果可用）", "Use OpenInputLagPatch (if avaliable)", "OpenInputLagPatch を使用する (利用可能な場合)" ],
       "THPRAC_GAMES_VPATCH_OILP_PRIORITY": [
         "如果同时打开两个选项，启动器会优先调用OpenInputLagPatch",

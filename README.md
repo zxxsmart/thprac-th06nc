@@ -6,7 +6,7 @@ An **unofficial fork of [thprac](https://github.com/touhouworldcup/thprac)** wit
 
 **[Download the latest release](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [Report an issue](https://github.com/zxxsmart/thprac-th06nc/issues)
 
-Current fork version: **1.0.4**. Based on thprac **2.3.1.1**, upstream commit `55e6ed1336621e3099e7df1138acc360cf0500fa`.
+Current source version: **1.1.0**. Based on thprac **2.3.1.1**, upstream commit `55e6ed1336621e3099e7df1138acc360cf0500fa`.
 
 ## Install and use
 
@@ -15,6 +15,10 @@ Current fork version: **1.0.4**. Based on thprac **2.3.1.1**, upstream commit `5
 3. In the game, select **Practice Start → difficulty, character, stage → practice settings → Z**.
 
 If the game is already running, open **Tools → Apply thprac to a running game** in the launcher. After attaching, return to the game's main menu and enter Practice Start.
+
+**Experimental low-latency display:** enable **Launch with low latency** before starting New Classic. This option is off by default and works independently of practice features. Use **Borderless** (recommended) or **Window**, with your preferred high refresh rate selected in Windows. It reduces display waiting and may cause tearing; game speed and replay rules are unchanged. Unsupported display modes, including exclusive Full Screen, use the original display path. Restart the game after changing the launcher option.
+
+Implementation, high-refresh behavior and risks: [Low-latency mode (Chinese)](LOW_LATENCY.md).
 
 Supported game: **Steam th06nc 1.03**, Windows x64. The exact executable SHA-256 is checked before injection:
 

@@ -11,7 +11,7 @@ int MenuDifficulty();
 int MenuShot();
 int NativeRank(int difficulty);
 int PracticeLanguage();
-bool InstallOverlay();
+bool InstallOverlay(bool lowLatency = false);
 void OpenPractice();
 void ClosePractice();
 bool PracticeIsOpen();

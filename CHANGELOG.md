@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 — 2026-09-14
+
+- Add optional experimental low-latency display for New Classic, independent of practice features; support Borderless/Window and retain native game speed and replay compatibility.
+- Show New Classic launch settings on first selection, including existing configurations; wait for the Steam game loader before injection.
+- Open the Steam installation directory and hide the unavailable custom.exe action.
+- Pause and resume practice BGM using the game's native audio behavior.
+- Document low-latency implementation, high-refresh behavior and tradeoffs in [LOW_LATENCY.md](LOW_LATENCY.md).
+
 ## 1.0.4 — 2026-09-13
 
 - Fix numeric editing after starting practice or reopening menus.
@@ -38,5 +46,5 @@ thprac 2.3.1.1 (`55e6ed1336621e3099e7df1138acc360cf0500fa`).
 - Use independent version numbering, fork project/issues links and manual Releases-page updates.
 - Remove upstream update checks, downloads, replacement and legacy update commands.
 
-NC replay metadata: v7. Local IPC: v9. Earlier unpublished development replay
+NC replay metadata: v7. Local IPC: v10. Earlier unpublished development replay
 formats are not supported. Game EXE SHA-256 is checked before injection.

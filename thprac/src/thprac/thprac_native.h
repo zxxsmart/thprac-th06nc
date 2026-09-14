@@ -6,8 +6,8 @@
 #include "thprac_gui_locale.h"
 namespace THPrac {
 // Cross-bitness is handled by a companion built from this same source tree.
-inline bool LaunchTH06NC(bool practice, DWORD attachPid = 0) {
-    if (!practice && !attachPid)
+inline bool LaunchTH06NC(bool practice, DWORD attachPid = 0, bool lowLatency = false) {
+    if (!practice && !attachPid && !lowLatency)
         return reinterpret_cast<INT_PTR>(ShellExecuteW(nullptr, L"open", L"steam://rungameid/4659620", nullptr, nullptr, SW_SHOWNORMAL)) > 32;
     std::wstring helper;
     if (NativeBundle::Present()) {
@@ -25,6 +25,8 @@ inline bool LaunchTH06NC(bool practice, DWORD attachPid = 0) {
     std::wstring command = L"\"" + helper + L"\" " +
         (attachPid ? L"--attach " + std::to_wstring(attachPid) : L"--steam") +
         L" --language " + std::to_wstring(Gui::LocaleGet());
+    if(lowLatency)command += L" --low-latency";
+    if(!practice)command += L" --no-practice";
     STARTUPINFOW startup{sizeof(startup)};
     startup.dwFlags = STARTF_USESHOWWINDOW;
     startup.wShowWindow = SW_HIDE;

@@ -7,7 +7,7 @@
 #include <algorithm>
 #include "sections.h"
 
-constexpr uint32_t Magic = 0x4e435031, Protocol = 9, ReplayProtocol = 7;
+constexpr uint32_t Magic = 0x4e435031, Protocol = 10, ReplayProtocol = 7;
 constexpr wchar_t ExpectedHash[] = L"07850c8c6e469c0e82c13423e6d0d096a88d693455bdacacbb44c0aa3bcce473";
 enum Flags : uint32_t { Invincible=1, InfiniteLives=2, InfiniteBombs=4, InfinitePower=8,
     TimeLock=16, AutoBomb=32, CustomRank=64, KeepBgm=128 };
@@ -30,9 +30,17 @@ struct Status {
 };
 // UI language follows thprac's locale order: Chinese, English, Japanese.
 // Keep it outside Settings so it cannot affect practice or replay parameters.
-struct Shared { uint32_t magic=Magic, version=Protocol; Settings settings{}; Status status{}; int language=1; };
+struct Shared {
+    uint32_t magic=Magic, version=Protocol;
+    Settings settings{}; Status status{};
+    int language=1, practiceEnabled=1, lowLatencyState=0;
+    uint32_t lowLatencyError=0;
+};
+// Supplied by the bridge before injection; immutable for this game process.
+struct LaunchOptions { uint32_t magic=Magic, version=Protocol; int practice=1, lowLatency=0, language=1; };
 inline std::wstring mapName(DWORD pid) { return L"Local\\Th06NcPractice_"+std::to_wstring(pid); }
 inline std::wstring mutexName(DWORD pid) { return mapName(pid)+L"_lock"; }
+inline std::wstring launchName(DWORD pid) { return mapName(pid)+L"_launch"; }
 inline std::wstring executablePath(HMODULE module=nullptr) {
     std::wstring s(32768,L'\0'); auto n=GetModuleFileNameW(module,s.data(),DWORD(s.size())); s.resize(n); return s;
 }

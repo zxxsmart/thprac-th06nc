@@ -380,7 +380,7 @@ static bool LauncherRunGame(LauncherState* state, THGameID game, LauncherInstanc
     case LAUNCH_NOTHING:
         break;
     }
-    if (game == ID_TH06NC) return LaunchTH06NC(inst->apply_thprac);
+    if (game == ID_TH06NC) return LaunchTH06NC(inst->apply_thprac, 0, inst->low_latency);
     if (inst->type != TYPE_THCRAP) {
         if (inst->type != TYPE_STEAM) {
             uint32_t flags = RUN_FLAG_SKIP_IDENTIFY;
@@ -481,6 +481,8 @@ static void InitLauncherGame(LauncherState* state, LauncherGame* game, yyjson_va
             .allow_oilp = game->versions[ver_off].has_oilp,
             .allow_vpatch = game->versions[ver_off].has_vpatch,
         };
+        if(game->id == ID_TH06NC)
+            yyjson_eval_numeric(yyjson_obj_get(cur, "low_latency"), &instances[valid_insts_count].low_latency);
         valid_insts_count++;
     }
 
@@ -492,6 +494,12 @@ static void InitLauncherGame(LauncherState* state, LauncherGame* game, yyjson_va
     game->inst_count = valid_insts_count;
     game->instances = instances;
     yyjson_eval_numeric(yyjson_obj_get(json, "default_launch"), &game->default_launch);
+    if (game->id == ID_TH06NC) {
+        yyjson_eval_numeric(yyjson_obj_get(json, "launch_options_seen"), &game->nc_launch_options_seen);
+        // Older NC versions selected the Steam instance for direct launch
+        // automatically. Show its newly available launch options once.
+        if (!game->nc_launch_options_seen) game->default_launch = -1;
+    }
 }
 
 static void EnsureNCSteamInstance() {
@@ -504,7 +512,7 @@ static void EnsureNCSteamInstance() {
         instance->apply_thprac = true;
         game.instances = instance;
         game.inst_count = 1;
-        game.default_launch = 0;
+        game.default_launch = -1;
     }
 }
 
@@ -537,6 +545,8 @@ void SaveGamesJson() {
     for (const auto& game : games) {
         yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, root, gThGameStrs[game.id]);
         yyjson_mut_obj_add_sint(doc, obj, "default_launch", game.default_launch);
+        if (game.id == ID_TH06NC)
+            yyjson_mut_obj_add_bool(doc, obj, "launch_options_seen", game.nc_launch_options_seen);
 
         yyjson_mut_val* insts = yyjson_mut_obj_add_arr(doc, obj, "instances");
         for (size_t i = 0; i < game.inst_count; i++) {
@@ -547,6 +557,8 @@ void SaveGamesJson() {
             yyjson_mut_obj_add_int(doc, inst, "type", game.instances[i].type);
             yyjson_mut_obj_add_str(doc, inst, "path", game.instances[i].path);
             yyjson_mut_obj_add_bool(doc, inst, "apply_thprac", game.instances[i].apply_thprac);
+            if(game.id == ID_TH06NC)
+                yyjson_mut_obj_add_bool(doc, inst, "low_latency", game.instances[i].low_latency);
         }
     }
     
@@ -647,12 +659,31 @@ static unsigned int CountAllInstances() {
     return ret;
 }
 
+static std::wstring NCInstallDirectory() {
+    // Steam registers the actual library location, which may be on any drive.
+    constexpr auto key = L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App 4659620";
+    for (REGSAM view : { KEY_WOW64_64KEY, KEY_WOW64_32KEY }) {
+        HKEY installed{};
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, key, 0, KEY_QUERY_VALUE | view, &installed) != ERROR_SUCCESS) continue;
+        wchar_t path[32768]{};
+        DWORD bytes = sizeof(path) - sizeof(wchar_t), type{};
+        auto result = RegQueryValueExW(installed, L"InstallLocation", nullptr, &type, reinterpret_cast<BYTE*>(path), &bytes);
+        RegCloseKey(installed);
+        if (result == ERROR_SUCCESS && type == REG_SZ) {
+            DWORD attributes = GetFileAttributesW(path);
+            if (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY)) return path;
+        }
+    }
+    return {};
+}
+
 static bool DetailsPage(LauncherState* state) {
     if (ImGui::Button(S(TH_BACK))) {
         return false;
     }
 
     auto* game = state->selectedGame;
+    if (game->id == ID_TH06NC) game->nc_launch_options_seen = true;
 
     ImGui::SameLine();
     Gui::TextCentered(S(game->title), ImGui::GetWindowWidth());
@@ -768,11 +799,18 @@ static bool DetailsPage(LauncherState* state) {
     ImGui::SameLine();
     if (inst->type != TYPE_THCRAP) {
         if (ImGui::Button(S(THPRAC_GAMES_OPEN_FOLDER))) {
-            std::wstring pathW = utf8_to_utf16(inst->path);
-            size_t idx = pathW.rfind(L"\\");
-            if (idx != std::wstring::npos) {
-                pathW.resize(idx);
+            std::wstring pathW;
+            if (game->id == ID_TH06NC) pathW = NCInstallDirectory();
+            else {
+                pathW = utf8_to_utf16(inst->path);
+                size_t idx = pathW.rfind(L"\\");
+                if (idx != std::wstring::npos) pathW.resize(idx);
+                else pathW.clear();
+            }
+            if (!pathW.empty()) {
                 ShellExecuteW(Gui::ImplWin32GetHwnd(), L"open", pathW.c_str(), nullptr, nullptr, SW_SHOW);
+            } else if (game->id == ID_TH06NC) {
+                MessageBoxW(Gui::ImplWin32GetHwnd(), utf8_to_utf16(S(TH06NC_INSTALL_DIRECTORY_ERROR)).c_str(), L"thprac", MB_ICONERROR);
             }
         }
         ImGui::SameLine();
@@ -789,7 +827,7 @@ static bool DetailsPage(LauncherState* state) {
         ShellExecuteExW(&se);
     }
     ImGui::SameLine();
-    if (ImGui::Button(S(THPRAC_GAMES_LAUNCH_CUSTOM))) {
+    if (game->id != ID_TH06NC && ImGui::Button(S(THPRAC_GAMES_LAUNCH_CUSTOM))) {
         if (inst->type != TYPE_THCRAP) {
             std::wstring pathW = utf8_to_utf16(inst->path);
             size_t idx = pathW.rfind(L"\\");
@@ -821,6 +859,11 @@ static bool DetailsPage(LauncherState* state) {
     ImGui::SameLine();
     Gui::HelpMarker(S(THPRAC_GAMES_DEFAULT_LAUNCH_DESC));
 
+    if(game->id == ID_TH06NC) {
+        ImGui::Checkbox(S(THPRAC_GAMES_LOW_LATENCY), &inst->low_latency);
+        ImGui::SameLine();
+        Gui::HelpMarker(S(THPRAC_GAMES_LOW_LATENCY_DESC));
+    }
     if (inst->type != TYPE_THCRAP && inst->type != TYPE_STEAM) {
         if (ver->has_oilp) {
             ImGui::Checkbox(S(THPRAC_GAMES_USE_OILP), &inst->allow_oilp);
@@ -1448,7 +1491,9 @@ static inline void GamesList(LauncherState* state, LauncherGame* games_param, si
             ImGui::BeginDisabled();
         }
         if (ImGui::Selectable(S(game.title))) {
-            if (game.default_launch != -1) {
+            if (game.id == ID_TH06NC && !game.nc_launch_options_seen) {
+                state->selectedGame = &game;
+            } else if (game.default_launch != -1) {
                 LauncherRunGame(state, game.id, game.instances + game.default_launch);
             } else if (state->settings.auto_default_launch) {
                 LauncherRunGame(state, game.id, game.instances);

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "MinHook.h"
 #include "module.h"
+#include "presentation.h"
 #include "thprac_locale_def.h"
 #include <cstring>
 #include <atomic>
@@ -9,6 +10,9 @@ namespace THPrac::TH06NC { uintptr_t imageBase{}; }
 using namespace THPrac::TH06NC;
 namespace {
 uintptr_t base{}; Shared* shared{}; HANDLE mutex{}, mapping{};
+LaunchOptions launchOptions{};
+using CalcCallback = int64_t(*)(uint32_t*);
+CalcCallback originalCalc{};
 Settings config{}, requested{}, initialConfig{}; Status status{};
 std::atomic<int> language{1};
 bool active=false, playback=false, armed=false;
@@ -17,6 +21,7 @@ int lockedLives=0,lockedBombs=0,lockedPower=0;
 bool retryPending=false, speedOwned=false;
 double originalFps=60.0;
 bool initializingPractice{}, practicePaused{};
+int pausedBgm=-1;
 int selectedDifficulty{};
 using PlayBgm= int64_t(*)(void*,const char*); PlayBgm originalBgm{};
 void* practiceMenu{};int practiceTransitionMode{};bool confirmNativePractice{};
@@ -36,6 +41,20 @@ using VoidEcl=void(*)(void*,void*); VoidEcl originalFinal{};
 using FileWriter=void(*)(const char*,void*,size_t);FileWriter originalWrite{};
 template<class T> T& mem(uintptr_t rva) { return *reinterpret_cast<T*>(base+rva); }
 template<class T> T& field(void* p,size_t offset) { return *reinterpret_cast<T*>(static_cast<char*>(p)+offset); }
+void pausePracticeBgm() {
+    pausedBgm=-1;
+    int handle=mem<int>(Rva::BgmHandle);
+    // Match native GameUpdate: StopSound(handle, 0) preserves the cursor.
+    if(!mem<uint8_t>(Rva::SpellPractice) && handle!=-1 &&
+       reinterpret_cast<int(*)(int,int)>(base+Rva::StopSound)(handle,0)==0)pausedBgm=handle;
+}
+void resumePracticeBgm() {
+    // Native pause resume uses the current loop mode and does not rewind.
+    // Never restart a handle replaced by a native scene/music transition.
+    if(pausedBgm!=-1 && pausedBgm==mem<int>(Rva::BgmHandle))
+        reinterpret_cast<int(*)(int,int,int)>(base+Rva::PlaySound)(pausedBgm,mem<uint8_t>(Rva::BgmLoop)?3:1,0);
+    pausedBgm=-1;
+}
 void sync() {
     if(!shared) return;
     DWORD lock=WaitForSingleObject(mutex,0);
@@ -45,7 +64,16 @@ void sync() {
         if(shared->language>=0&&shared->language<=2)language.store(shared->language,std::memory_order_relaxed);
     }
 
-    shared->status=status; ReleaseMutex(mutex);
+    shared->status=status;
+    shared->practiceEnabled=launchOptions.practice;
+    shared->lowLatencyState=static_cast<int>(LowLatencyState());
+    shared->lowLatencyError=LowLatencyError();
+    ReleaseMutex(mutex);
+}
+int64_t calc(uint32_t* result) {
+    LowLatencyBeforeFrame();
+    if(!launchOptions.practice)sync(); // Practice's supervisor already synchronizes this frame.
+    return originalCalc(result);
 }
 void message(const wchar_t* text) { wcsncpy_s(status.message,text,_TRUNCATE); }
 bool bossBgm(const Settings& settings) {
@@ -195,7 +223,7 @@ int64_t init(void* p) {
         active=owned && requested.enabled;
         events.clear();nextEvent=0;
     }
-    armed=false;retryPending=false;practicePaused=false;ClosePause();
+    armed=false;retryPending=false;practicePaused=false;pausedBgm=-1;ClosePause();
     initialConfig=config;simulationTick=0;restartSeen=requested.restart;
     if(active || vanillaRetry) {
         mem<int>(Rva::Stage)=config.stage-1;
@@ -269,6 +297,7 @@ int64_t update(void* p) {
     }
     if(active&&!playback) {
         if(requested.restart!=restartSeen) {
+            resumePracticeBgm();
             restartSeen=requested.restart;
             retryPending=true;
             mem<uint8_t>(Rva::KeepBgm)=uint8_t((config.flags&KeepBgm)&&requested.stage==config.stage&&bossBgm(config)==bossBgm(requested));
@@ -281,14 +310,15 @@ int64_t update(void* p) {
     if(active && !playback && mem<int>(Rva::NextState)==2) {
         if(!practicePaused && !mem<uint8_t>(Rva::Paused) && !mem<uint8_t>(Rva::GameOver) &&
            ((mem<uint16_t>(Rva::Input)&0x400) && !(mem<uint16_t>(Rva::PreviousInput)&0x400))) {
-            practicePaused=true;OpenPause();
+            practicePaused=true;pausePracticeBgm();OpenPause();
         }
         if(practicePaused) {
             int action=TakePauseAction();
             if(action){
                 practicePaused=false;ClosePause();
                 mem<uint16_t>(Rva::PreviousInput)|=0x400;
-                if(action==2){mem<int>(Rva::NextState)=7;return 3;}
+                if(action==2){pausedBgm=-1;mem<int>(Rva::NextState)=7;return 3;}
+                resumePracticeBgm();
                 if(action==3){selectParameters();RequestPracticeRestart();return 3;}
             } else {
                 // Keep native render preparation, and stop the update chain just
@@ -416,12 +446,24 @@ int64_t menu(void* p) {
 DWORD WINAPI start(void*) {
     wchar_t diagnostic[8];diagnostics=GetEnvironmentVariableW(L"TH06NC_PRACTICE_TRACE",diagnostic,8)>0;
     imageBase=base=reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
+    if(HANDLE options=OpenFileMappingW(FILE_MAP_READ,FALSE,launchName(GetCurrentProcessId()).c_str())) {
+        if(auto view=static_cast<const LaunchOptions*>(MapViewOfFile(options,FILE_MAP_READ,0,0,sizeof(LaunchOptions)))) {
+            if(view->magic==Magic && view->version==Protocol &&
+                (view->practice==0||view->practice==1) && (view->lowLatency==0||view->lowLatency==1) &&
+                view->language>=0 && view->language<=2)launchOptions=*view;
+            UnmapViewOfFile(view);
+        }
+        CloseHandle(options);
+    }
+    language.store(launchOptions.language);
     mapping=CreateFileMappingW(INVALID_HANDLE_VALUE,nullptr,PAGE_READWRITE,0,sizeof(Shared),mapName(GetCurrentProcessId()).c_str());
     if(!mapping)return 1;
     shared=static_cast<Shared*>(MapViewOfFile(mapping,FILE_MAP_ALL_ACCESS,0,0,sizeof(Shared)));
     mutex=CreateMutexW(nullptr,FALSE,mutexName(GetCurrentProcessId()).c_str());
     if(!shared||!mutex)return 2;
     new(shared) Shared();
+    shared->language=launchOptions.language;
+    shared->practiceEnabled=launchOptions.practice;
     if(!supportedFile(executablePath())) {status.error=1;message(L"游戏版本不匹配：仅支持已核对的 1.03 EXE");sync();return 3;}
     if(MH_Initialize()!=MH_OK) {status.error=2;message(L"初始化钩子失败");sync();return 4;}
     struct Hook {uintptr_t rva;void* target;void** original;};
@@ -432,11 +474,15 @@ DWORD WINAPI start(void*) {
       {Rva::PlayBgm,(void*)playBgm,(void**)&originalBgm},
       {Rva::ResultInit,(void*)resultInit,(void**)&originalResultInit},
       {Rva::WriteFile,(void*)writeFile,(void**)&originalWrite},{Rva::SupervisorUpdate,(void*)supervisor,(void**)&originalSupervisor}};
-    for(auto& h:hooks)if(MH_CreateHook((void*)(base+h.rva),h.target,h.original)!=MH_OK){
+    if(launchOptions.practice)for(auto& h:hooks)if(MH_CreateHook((void*)(base+h.rva),h.target,h.original)!=MH_OK){
         MH_Uninitialize();status.error=3;message(L"创建钩子失败，未应用补丁");sync();return 5;}
-    if(!InstallOverlay()){MH_Uninitialize();status.error=6;message(L"Direct3D 11 界面挂钩初始化失败。");sync();return 7;}
+    if(launchOptions.lowLatency && MH_CreateHook((void*)(base+Rva::CalcChain),(void*)calc,(void**)&originalCalc)!=MH_OK){
+        MH_Uninitialize();status.error=3;message(L"创建显示钩子失败，未应用补丁");sync();return 5;}
+    if(!InstallOverlay(launchOptions.lowLatency!=0)){MH_Uninitialize();status.error=6;message(L"Direct3D 11 界面挂钩初始化失败。");sync();return 7;}
     if(MH_EnableHook(MH_ALL_HOOKS)!=MH_OK){MH_Uninitialize();status.error=4;message(L"启用钩子失败");sync();return 6;}
-    status.ready=1;message(L"已连接。从 Practice Start 选择单面后设置练习参数。");sync();return 0;
+    status.ready=1;
+    message(launchOptions.practice?L"已连接。从 Practice Start 选择单面后设置练习参数。":L"已连接，仅应用低延迟显示。");
+    sync();return 0;
 }
 }
 BOOL WINAPI DllMain(HINSTANCE instance,DWORD reason,LPVOID) {

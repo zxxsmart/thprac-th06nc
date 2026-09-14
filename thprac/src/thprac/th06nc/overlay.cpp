@@ -1,4 +1,5 @@
 #include "module.h"
+#include "presentation.h"
 #include "spell_names.h"
 #include "section_menu.h"
 #include "thprac_gui_components.h"
@@ -72,6 +73,10 @@ public:
 namespace {
 using PresentFn = HRESULT (STDMETHODCALLTYPE*)(IDXGISwapChain*, UINT, UINT);
 PresentFn originalPresent{};
+HRESULT PresentFrame(IDXGISwapChain* swap, UINT interval, UINT flags)
+{
+    return LowLatencyPresent(swap, interval, flags, originalPresent);
+}
 ID3D11Device* device{};
 ID3D11DeviceContext* context{};
 ImGuiContext* guiContext{};
@@ -85,6 +90,8 @@ bool wanted{}, opened{};
 bool quickWanted{}, advancedWanted{}, inputHooked{};
 int action{}, openingFrames{};
 uint16_t uiInput{}, uiPrevious{}, uiRepeat{};
+DisplayState previousDisplayState=DisplayState::Off;
+ULONGLONG displayNoticeUntil{};
 
 bool NumericInputActive()
 {
@@ -94,14 +101,21 @@ bool NumericInputActive()
 
 HRESULT STDMETHODCALLTYPE Present(IDXGISwapChain* swap, UINT interval, UINT flags)
 {
+    auto displayState=LowLatencyState();
+    if(displayState!=previousDisplayState) {
+        if(previousDisplayState==DisplayState::Active && displayState==DisplayState::Unavailable)
+            displayNoticeUntil=GetTickCount64()+10000;
+        previousDisplayState=displayState;
+    }
+    bool displayNotice=displayState==DisplayState::Unavailable && GetTickCount64()<displayNoticeUntil;
     if(!PracticeActive()){quickWanted=false;advancedWanted=false;pauseWanted=false;}
-    if (!wanted && !opened && !quickWanted && !advancedWanted && !pauseWanted && !inputHooked) return originalPresent(swap, interval, flags);
+    if (!wanted && !opened && !quickWanted && !advancedWanted && !pauseWanted && !inputHooked && !displayNotice) return PresentFrame(swap, interval, flags);
     DXGI_SWAP_CHAIN_DESC desc{};
-    if (FAILED(swap->GetDesc(&desc))) return originalPresent(swap, interval, flags);
+    if (FAILED(swap->GetDesc(&desc))) return PresentFrame(swap, interval, flags);
     auto previousContext = ImGui::GetCurrentContext();
     if (!guiContext) {
         if (FAILED(swap->GetDevice(__uuidof(ID3D11Device), reinterpret_cast<void**>(&device))))
-            return originalPresent(swap, interval, flags);
+            return PresentFrame(swap, interval, flags);
         device->GetImmediateContext(&context);
         guiContext = ImGui::CreateContext();
         ImGui::GetIO().IniFilename = nullptr;
@@ -156,8 +170,10 @@ HRESULT STDMETHODCALLTYPE Present(IDXGISwapChain* swap, UINT interval, UINT flag
     if(!anyVisible) {
         ImGui::GetIO().MouseDrawCursor=false;
         if(inputHooked){Gui::ImplWin32UnHookWndProc();inputHooked=false;}
+    }
+    if(!anyVisible && !displayNotice) {
         ImGui::SetCurrentContext(previousContext);
-        return originalPresent(swap, interval, flags);
+        return PresentFrame(swap, interval, flags);
     }
     auto native = *reinterpret_cast<uint16_t*>(imageBase + Rva::Input);
     auto prev = *reinterpret_cast<uint16_t*>(imageBase + Rva::PreviousInput);
@@ -191,6 +207,15 @@ HRESULT STDMETHODCALLTYPE Present(IDXGISwapChain* swap, UINT interval, UINT flag
     }
     if(quickWanted){overlay->Open();overlay->Update();}else overlay->Close();
     if(advancedWanted){advanced->Open();advanced->Update();}else advanced->Close();
+    if(displayNotice) {
+        ImGui::SetNextWindowPos({12,468},ImGuiCond_Always,{0,1});
+        ImGui::SetNextWindowSize({std::min(480.0f,io.DisplaySize.x-24.0f),0},ImGuiCond_Always);
+        ImGui::SetNextWindowBgAlpha(0.9f);
+        if(ImGui::Begin("##nc_display_notice",nullptr,ImGuiWindowFlags_NoDecoration|
+            ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoInputs|ImGuiWindowFlags_NoSavedSettings))
+            ImGui::TextWrapped("%s",S(THPRAC_GAMES_LOW_LATENCY_UNAVAILABLE));
+        ImGui::End();
+    }
     if (wanted && ++openingFrames > 12 && !ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel)) {
         if ((native & 0x100) && !(prev & 0x100) && (!ImGui::IsAnyItemActive() || NumericInputActive())) {
             // Numeric widgets have already applied this frame's edits. Z also
@@ -234,7 +259,7 @@ HRESULT STDMETHODCALLTYPE Present(IDXGISwapChain* swap, UINT interval, UINT flag
         }
     }
     ImGui::SetCurrentContext(previousContext);
-    return originalPresent(swap, interval, flags);
+    return PresentFrame(swap, interval, flags);
 }
 }
 THGuiPrac& PracticeUi(){return *practice;}
@@ -247,7 +272,7 @@ bool PracticeIsOpen() { return wanted || opened; }
 int TakePracticeAction() { int result = action; action = 0; return result; }
 void ToggleQuickMenu(){if(PracticeActive()&&!NumericInputActive())quickWanted=!quickWanted;}
 void ToggleAdvancedMenu(){if(PracticeActive())advancedWanted=!advancedWanted;}
-bool InstallOverlay()
+bool InstallOverlay(bool lowLatency)
 {
     // A hidden temporary swap chain gives the system's actual Present entry point.
     auto instance = GetModuleHandleW(nullptr);
@@ -273,6 +298,7 @@ bool InstallOverlay()
         0, nullptr, 0, D3D11_SDK_VERSION, &desc, &swap, &discoveryDevice, nullptr, &discoveryContext))) {
         auto entry = (*reinterpret_cast<void***>(swap))[8];
         ok = MH_CreateHook(entry, reinterpret_cast<void*>(Present), reinterpret_cast<void**>(&originalPresent)) == MH_OK;
+        if(ok && lowLatency)ok=InstallLowLatency((*reinterpret_cast<void***>(swap))[13]);
         discoveryContext->Release();
         discoveryDevice->Release();
         swap->Release();
