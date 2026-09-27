@@ -9,6 +9,8 @@
 
 constexpr uint32_t Magic = 0x4e435031, Protocol = 10, ReplayProtocol = 7;
 constexpr wchar_t ExpectedHash[] = L"07850c8c6e469c0e82c13423e6d0d096a88d693455bdacacbb44c0aa3bcce473";
+constexpr wchar_t Steam25306795Hash[] = L"48630a42a2eb6762d0db2a7e0d151203efbe67220fef7d2f9d0d51857928ac82";
+enum class GameBuild { Unsupported, Original, Steam25306795 };
 enum Flags : uint32_t { Invincible=1, InfiniteLives=2, InfiniteBombs=4, InfinitePower=8,
     TimeLock=16, AutoBomb=32, CustomRank=64, KeepBgm=128 };
 struct Settings {
@@ -45,10 +47,10 @@ inline std::wstring executablePath(HMODULE module=nullptr) {
     std::wstring s(32768,L'\0'); auto n=GetModuleFileNameW(module,s.data(),DWORD(s.size())); s.resize(n); return s;
 }
 inline std::wstring directory(const std::wstring& p) { return p.substr(0,p.find_last_of(L"\\/")); }
-inline bool supportedFile(const std::wstring& path) {
+inline GameBuild identifyBuild(const std::wstring& path) {
     HANDLE file=CreateFileW(path.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,0,nullptr);
-    if(file==INVALID_HANDLE_VALUE) return false;
-    BCRYPT_ALG_HANDLE algorithm{}; BCRYPT_HASH_HANDLE hash{}; bool ok=false;
+    if(file==INVALID_HANDLE_VALUE) return GameBuild::Unsupported;
+    BCRYPT_ALG_HANDLE algorithm{}; BCRYPT_HASH_HANDLE hash{}; GameBuild build=GameBuild::Unsupported;
     if(BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,0)>=0 &&
        BCryptCreateHash(algorithm,&hash,nullptr,0,nullptr,0,0)>=0) {
         std::vector<unsigned char> buffer(65536); DWORD n=0; bool readOk=true;
@@ -56,11 +58,14 @@ inline bool supportedFile(const std::wstring& path) {
           if(!n) break; if(BCryptHashData(hash,buffer.data(),n,0)<0){readOk=false;break;} }
         unsigned char digest[32]{}; if(readOk && BCryptFinishHash(hash,digest,32,0)>=0) {
           std::wstring value; const wchar_t* hex=L"0123456789abcdef";
-          for(auto c:digest){value+=hex[c>>4];value+=hex[c&15];} ok=value==ExpectedHash;
+          for(auto c:digest){value+=hex[c>>4];value+=hex[c&15];}
+          if(value==ExpectedHash)build=GameBuild::Original;
+          else if(value==Steam25306795Hash)build=GameBuild::Steam25306795;
         }
     }
-    if(hash)BCryptDestroyHash(hash); if(algorithm)BCryptCloseAlgorithmProvider(algorithm,0); CloseHandle(file);return ok;
+    if(hash)BCryptDestroyHash(hash); if(algorithm)BCryptCloseAlgorithmProvider(algorithm,0); CloseHandle(file);return build;
 }
+inline bool supportedFile(const std::wstring& path) { return identifyBuild(path)!=GameBuild::Unsupported; }
 inline bool valid(const Settings& s) {
     constexpr int lastSections[]={6,12,21,30,38,49,73};
     if(s.stage<1||s.stage>7)return false;

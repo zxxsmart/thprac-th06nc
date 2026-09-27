@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1 — 2026-09-27
+
+- Support Steam th06nc build 25306795 with a separate address layout while retaining original 1.03 support.
+- Keep existing practice behavior, low-latency options and replay format.
+
 ## 1.1.0 — 2026-09-14
 
 - Add optional experimental low-latency display for New Classic, independent of practice features; support Borderless/Window and retain native game speed and replay compatibility.

@@ -6,7 +6,7 @@ An **unofficial fork of [thprac](https://github.com/touhouworldcup/thprac)** wit
 
 **[Download the latest release](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [Report an issue](https://github.com/zxxsmart/thprac-th06nc/issues)
 
-Current source version: **1.1.0**. Based on thprac **2.3.1.1**, upstream commit `55e6ed1336621e3099e7df1138acc360cf0500fa`.
+Current source version: **1.1.1**. Based on thprac **2.3.1.1**, upstream commit `55e6ed1336621e3099e7df1138acc360cf0500fa`.
 
 ## Install and use
 
@@ -20,10 +20,11 @@ If the game is already running, open **Tools → Apply thprac to a running game*
 
 Implementation, high-refresh behavior and risks: [Low-latency mode](LOW_LATENCY.md#en).
 
-Supported game: **Steam th06nc 1.03**, Windows x64. The exact executable SHA-256 is checked before injection:
+Supported game: **Steam th06nc build 25306795 and the original 1.03 executable**, Windows x64. The executable SHA-256 selects the matching address layout before injection:
 
 ```text
-07850c8c6e469c0e82c13423e6d0d096a88d693455bdacacbb44c0aa3bcce473
+48630a42a2eb6762d0db2a7e0d151203efbe67220fef7d2f9d0d51857928ac82  Steam build 25306795
+07850c8c6e469c0e82c13423e6d0d096a88d693455bdacacbb44c0aa3bcce473  Original 1.03
 ```
 
 Game updates may require a new adapter release. You must own and install the game separately.

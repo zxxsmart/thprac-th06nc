@@ -464,7 +464,9 @@ DWORD WINAPI start(void*) {
     new(shared) Shared();
     shared->language=launchOptions.language;
     shared->practiceEnabled=launchOptions.practice;
-    if(!supportedFile(executablePath())) {status.error=1;message(L"游戏版本不匹配：仅支持已核对的 1.03 EXE");sync();return 3;}
+    auto build=identifyBuild(executablePath());
+    if(build==GameBuild::Unsupported) {status.error=1;message(L"游戏版本不匹配：当前 EXE 尚未适配");sync();return 3;}
+    if(build==GameBuild::Steam25306795)Rva::UseSteam25306795();
     if(MH_Initialize()!=MH_OK) {status.error=2;message(L"初始化钩子失败");sync();return 4;}
     struct Hook {uintptr_t rva;void* target;void** original;};
     Hook hooks[]={{Rva::GameInit,(void*)init,(void**)&originalInit},{Rva::GameUpdate,(void*)update,(void**)&originalUpdate},

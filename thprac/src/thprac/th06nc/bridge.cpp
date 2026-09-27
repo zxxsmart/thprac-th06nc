@@ -33,7 +33,7 @@ bool attach(DWORD pid,const LaunchOptions& options) {
     if(!process){failure(L"无法打开游戏进程，错误 "+std::to_wstring(GetLastError()));return false;}
     wchar_t path[32768];DWORD length=32768;
     if(!QueryFullProcessImageNameW(process,0,path,&length)||!supportedFile(path)){
-      CloseHandle(process);failure(L"EXE 的 SHA-256 与本地已核对的 th06nc 1.03 不一致，未注入。");return false;}
+      CloseHandle(process);failure(L"EXE 的 SHA-256 不在已适配的新典版本中，未注入。");return false;}
     mapping=OpenFileMappingW(FILE_MAP_ALL_ACCESS,FALSE,mapName(pid).c_str());
     LaunchMapping launch;
     if(!mapping) {

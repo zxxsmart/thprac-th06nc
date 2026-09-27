@@ -507,7 +507,7 @@ static void EnsureNCSteamInstance() {
         auto* instance = static_cast<LauncherInstance*>(calloc(1, sizeof(LauncherInstance)));
         if (!instance) return;
         instance->path = _strdup("steam://rungameid/4659620");
-        instance->name = _strdup("Steam - th06nc 1.03");
+        instance->name = _strdup("Steam - th06nc");
         instance->type = TYPE_STEAM;
         instance->apply_thprac = true;
         game.instances = instance;

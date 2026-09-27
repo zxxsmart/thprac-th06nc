@@ -6,7 +6,7 @@
 
 **[下载最新版](https://github.com/zxxsmart/thprac-th06nc/releases/latest)** · [反馈问题](https://github.com/zxxsmart/thprac-th06nc/issues)
 
-当前源代码版本 **1.1.0**，基于 thprac **2.3.1.1**，上游基线 `55e6ed1336621e3099e7df1138acc360cf0500fa`。
+当前源代码版本 **1.1.1**，基于 thprac **2.3.1.1**，上游基线 `55e6ed1336621e3099e7df1138acc360cf0500fa`。
 
 ## 使用
 
@@ -20,7 +20,7 @@
 
 机制、实现、高刷行为及风险见独立的[低延迟模式说明](LOW_LATENCY.md#zh)。
 
-当前支持 **Windows x64、Steam th06nc 1.03**，启动时核对完整 EXE 哈希。游戏更新后可能需要新的适配版本。游戏须自行购买和安装。
+当前支持 **Windows x64、Steam th06nc 构建 25306795 及原有 1.03 EXE**，启动时核对完整 EXE 哈希。游戏更新后可能需要新的适配版本。游戏须自行购买和安装。
 
 - 正常关卡练习流程；73 个 Boss 选段、40 个道中入口，包含三张新增 Extra 符卡。
 - 初始资源可调，Rank 默认保持新典原生值，也可手动开启自定义 Rank。
